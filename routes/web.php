@@ -9,8 +9,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Company Management
     Route::livewire('/companies', 'company-management')
-        ->middleware(['permission:view-companies'])
+        
         ->name('companies.index');
+
+    // Staff Management
+    Route::livewire('/staff', 'staff-management')
+        ->middleware(['permission:view-staff'])
+        ->name('staff.index');
 });
 
 require __DIR__.'/settings.php';
