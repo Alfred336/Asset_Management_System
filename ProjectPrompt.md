@@ -2,139 +2,112 @@
 
 ## 📌 Project Overview
 
-This repository is a **Laravel 13 + Livewire IT asset and staff management system** built with:
+A **Laravel 13 + Livewire IT asset and staff management system** built for Managed Service Providers.
 
-- Laravel 13
-- Laravel Fortify authentication
+**Stack:**
+- Laravel 13, Laravel Fortify authentication
 - Livewire + Flux UI
-- Tailwind CSS
-- Soft deletes for key resources
-- Livewire-based CRUD for companies, staff, users, and devices
-
-The codebase is designed for MSP-style multi-company asset management and internal user administration.
+- Tailwind CSS (Rose & Slate premium theme)
+- Spatie Laravel Permission (RBAC)
+- SQLite (dev) / MySQL (production)
+- Pest for testing, Vite for assets
 
 ---
 
 ## 🏢 Business Purpose
 
-This system supports:
-
 - Managing multiple client companies
 - Tracking IT devices and hardware assets
 - Maintaining staff records per company
-- Managing application users and account status
+- Managing application users, roles, and permissions
 - Assigning devices to staff members
 - Tracking device inventory, warranty, and hardware details
+- Automatic warranty expiry notifications
 
 ---
 
 ## 👤 Authentication & Authorization
 
-The system uses **Laravel Fortify** for authentication with:
+Laravel Fortify with:
+- Login, Registration, Email verification (`MustVerifyEmail`)
+- Password reset, Two-factor authentication
 
-- Login
-- Registration
-- Email verification
-- Password reset
-- Two-factor authentication
-
-Authorization is scaffolded using Gate checks inside Livewire components.
+Authorization via **Spatie Laravel Permission**:
+- `Gate::before` grants Super Admin all permissions
+- Roles: `Super Admin`, `Admin`, `Manager`
+- Permissions: view/create/edit/delete for companies, staff, devices, users, roles
 
 ---
 
-## 🧠 Implemented Modules
+## ✅ Implemented Modules
 
 ### 1. User Management
-- Create, edit, delete, and restore users
-- Soft delete users for activated/inactivated state
-- Search, sort, and pagination
-- Permission gate checks for create/edit/delete actions
-
----
+- Create, edit, delete, restore users (soft delete)
+- Assign roles directly from the user table
+- Role displayed as badge in table
+- Search, sort, pagination
 
 ### 2. Company Management
-- Create, edit, delete companies
-- Track company contact details, website, tax ID, and status
-- Soft delete support
-- Search, sort, and pagination
-
----
+- Create, edit, delete companies (soft delete)
+- Contact details, website, tax ID, status
+- Search, sort, pagination
 
 ### 3. Staff Management
-- Create, edit, delete staff members
-- Assign staff to companies
-- Track staff details including position, hire date, salary, employment type, status, and notes
-- Filter by company
-- Search, sort, and pagination
-
----
+- Create, edit, delete staff (soft delete)
+- Assign to companies, track position, hire date, salary, employment type
+- Filter by company, search, sort, pagination
 
 ### 4. Device Management
-- Create, edit, delete device records
-- Assign devices to companies and staff members
-- Track hardware details:
-  - Asset tag
-  - Serial number
-  - Model and manufacturer
-  - Device type
-  - Operating system and version
-  - Processor, RAM, storage
-  - IP address, MAC address, hostname
-  - Location, purchase date, purchase cost, warranty expiry
-  - Status values: active, offline, online, formatted, dead, under_repair, retired
-- Search, sort, filters, and pagination
+- Full hardware inventory (asset tag, serial, model, manufacturer, type, OS, CPU, RAM, storage, IP, MAC, hostname, location)
+- Status: active, offline, online, formatted, dead, under_repair, retired
+- Device status history tracked via `DeviceStatusHistory` model
+- Assign to company and staff
+- Warranty expiry tracking
+- Search, sort, filters, pagination
+
+### 5. Role Management
+- Create, edit, delete roles (Super Admin only)
+- Assign permissions to roles
+- Search, pagination
+
+### 6. Dashboard
+- Stats: total devices, staff, companies, expiring warranties (next 30 days)
+- Upcoming warranty expiries table (next 60 days)
+- Quick action links to all modules
+- Notification bell
+
+### 7. Notifications
+- `DeviceWarrantyExpiryNotification` — sent to all users when a device warranty expires within 30 days
+- `CheckDeviceWarrantyExpiry` artisan command — scheduled daily
 
 ---
 
-## 🔧 Current Implementation Notes
+## 🔧 Not Implemented
 
-- The repo currently includes device inventory support, but the `devices` route is not yet exposed in `routes/web.php`.
-- There is no `Spatie Laravel Permission` package installed in the current `composer.json`.
-- Weekly PDF report generation and automatic reminder notifications are not implemented in the current codebase.
-- Task tracking / ticket replacement is not present in the current repository.
+1. **Weekly PDF report generation** — no PDF library or scheduled report job
+2. **Device status history UI** — model and migration exist, but no view to display history
 
 ---
 
-## 📁 Folder Structure
+## 📁 Key Folder Structure
 
-- `app/`
-  - `Actions/Fortify/`
-  - `Concerns/`
-  - `Http/Controllers/`
-  - `Livewire/`
-    - `Actions/`
-    - `Settings/`
-    - `users/`
-    - `CompanyManagement.php`
-    - `DeviceManagement.php`
-    - `StaffManagement.php`
-    - `UserManagement.php`
-  - `Models/`
-  - `Providers/`
-- `bootstrap/`
-- `config/`
-- `database/`
-  - `factories/`
-  - `migrations/`
-  - `seeders/`
-- `public/`
-- `resources/`
-  - `css/`
-  - `js/`
-  - `views/`
-- `routes/`
-  - `console.php`
-  - `settings.php`
-  - `web.php`
-- `storage/`
-- `tests/`
-- `vendor/`
-
----
-
-## 🧪 Testing & Tooling
-
-- `pestphp/pest` for tests
-- `laravel/pint` for code style
-- `laravel/sail` available for local environment containers
-- `npm` assets via Vite
+```
+app/
+  Console/Commands/CheckDeviceWarrantyExpiry.php
+  Livewire/
+    CompanyManagement.php
+    DeviceManagement.php
+    StaffManagement.php
+    UserManagement.php
+    RoleManagement.php
+  Models/
+    Company.php, Staff.php, Device.php, DeviceStatusHistory.php, User.php
+  Notifications/DeviceWarrantyExpiryNotification.php
+database/migrations/   — companies, staff, devices, device_status_histories, permissions
+resources/views/
+  livewire/            — all CRUD views
+  layouts/app/sidebar.blade.php
+  dashboard.blade.php
+  welcome.blade.php    — branded landing page
+routes/web.php         — all routes behind auth + permission middleware
+```

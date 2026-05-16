@@ -3,8 +3,8 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <flux:sidebar sticky collapsible="mobile" class="border-e-0 bg-slate-900 dark:bg-slate-950 [&_[data-flux-sidebar-item]]:text-slate-300 [&_[data-flux-sidebar-item]:hover]:bg-slate-800 [&_[data-flux-sidebar-item]:hover]:text-white [&_[data-flux-sidebar-item][aria-current]]:bg-rose-500/20 [&_[data-flux-sidebar-item][aria-current]]:text-rose-400">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -34,20 +34,6 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
-
-            <div class="px-2 pb-2 hidden lg:block">
-                <livewire:notification-bell type="sidebar" />
-            </div>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
@@ -109,7 +95,45 @@
             </flux:dropdown>
         </flux:header>
 
-        {{ $slot }}
+        <!-- Top Header Bar -->
+        <flux:main class="flex flex-col">
+            <header class="hidden lg:flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
+                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <flux:icon name="home" class="size-4" />
+                    <span>/</span>
+                    <span class="text-slate-700 dark:text-slate-200 font-medium capitalize">
+                        {{ ucfirst(request()->segment(1) ?: 'dashboard') }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <livewire:notification-bell />
+                    <span class="text-xs text-slate-400 dark:text-slate-500">{{ now()->format('D, d M Y') }}</span>
+                    <flux:dropdown position="bottom" align="end">
+                        <flux:profile
+                            :name="auth()->user()->name"
+                            :initials="auth()->user()->initials()"
+                            icon-trailing="chevron-down"
+                        />
+                        <flux:menu>
+                            <div class="px-3 py-2 text-sm">
+                                <p class="font-medium text-slate-800 dark:text-white">{{ auth()->user()->name }}</p>
+                                <p class="text-slate-500 text-xs">{{ auth()->user()->email }}</p>
+                            </div>
+                            <flux:menu.separator />
+                            <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>Settings</flux:menu.item>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">Log out</flux:menu.item>
+                            </form>
+                        </flux:menu>
+                    </flux:dropdown>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-auto">
+                {{ $slot }}
+            </div>
+        </flux:main>
 
         @persist('toast')
             <flux:toast.group>

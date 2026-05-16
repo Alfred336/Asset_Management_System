@@ -23,22 +23,16 @@ class UserManagement extends Component
 
     // For create/edit modal
     public $showCreateModal = false;
-
     public $showEditModal = false;
 
     public $userId;
-
     public $name;
-
     public $email;
-
     public $email_verified_at;
-
     public $password;
-
     public $password_confirmation;
-
     public $status;
+    public $selectedRole = '';
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -60,22 +54,16 @@ class UserManagement extends Component
     public function render()
     {
         $users = User::query()
-            ->when($this->showTrashed, function ($query) {
-                $query->withTrashed();
-            })
-            ->when(! $this->showTrashed, function ($query) {
-                $query->whereNull('deleted_at');
-            })
-            ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
-            })
+            ->with('roles')
+            ->when($this->showTrashed, fn($q) => $q->withTrashed())
+            ->when(! $this->showTrashed, fn($q) => $q->whereNull('deleted_at'))
+            ->when($this->search, fn($q) => $q->where('name', 'like', '%'.$this->search.'%')->orWhere('email', 'like', '%'.$this->search.'%'))
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
             ->paginate($this->perPage);
 
-        return view('livewire.user-management', [
-            'users' => $users,
-        ]);
+        $roles = \Spatie\Permission\Models\Role::orderBy('name')->get();
+
+        return view('livewire.user-management', compact('users', 'roles'));
     }
 
     public function sortBy($field)
@@ -125,10 +113,8 @@ class UserManagement extends Component
     {
         $user = User::withTrashed()->findOrFail($id);
 
-        // Check if the user has permission to edit users
         if (Gate::denies('edit-user')) {
             session()->flash('error', 'You do not have permission to edit users.');
-
             return;
         }
 
@@ -136,6 +122,7 @@ class UserManagement extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->status = $user->trashed() ? 'inactive' : 'active';
+        $this->selectedRole = $user->roles->first()?->name ?? '';
 
         $this->showEditModal = true;
     }
@@ -146,20 +133,18 @@ class UserManagement extends Component
             'email' => 'required|email|max:255|unique:users,email,'.$this->userId,
         ]);
 
-        // Check if the user has permission to edit users
         if (Gate::denies('edit-user')) {
             session()->flash('error', 'You do not have permission to edit users.');
-
             return;
         }
 
         $user = User::withTrashed()->findOrFail($this->userId);
-        $user->update([
-            'name' => $this->name,
-            'email' => $this->email,
-        ]);
+        $user->update(['name' => $this->name, 'email' => $this->email]);
 
-        // Handle status change (soft delete/restore)
+        if ($this->selectedRole) {
+            $user->syncRoles([$this->selectedRole]);
+        }
+
         if ($this->status === 'inactive' && ! $user->trashed()) {
             $user->delete();
         } elseif ($this->status === 'active' && $user->trashed()) {
@@ -208,5 +193,6 @@ class UserManagement extends Component
         $this->password = '';
         $this->password_confirmation = '';
         $this->status = 'active';
+        $this->selectedRole = '';
     }
 }

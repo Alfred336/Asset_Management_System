@@ -4,6 +4,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
+// Email verification with OTP code
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', \App\Livewire\VerifyEmailCode::class)
+        ->name('verification.notice');
+
+    Route::post('/email/verification-notification', function () {
+        app(\App\Livewire\VerifyEmailCode::class)->sendCode();
+        return back()->with('status', 'verification-link-sent');
+    })->middleware('throttle:6,1')->name('verification.send');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 
