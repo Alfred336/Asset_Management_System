@@ -27,6 +27,9 @@
                     <flux:sidebar.item icon="user-group" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>
                         {{ __('Users') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="shield-check" :href="route('roles.index')" :current="request()->routeIs('roles.index')" wire:navigate>
+                        {{ __('Roles') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

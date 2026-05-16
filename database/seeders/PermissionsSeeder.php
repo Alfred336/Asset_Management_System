@@ -23,6 +23,7 @@ class PermissionsSeeder extends Seeder
             'view-users',
             'view-companies',
             'view-devices',
+            'view-roles',
             'create-user',
             'edit-user',
             'delete-user',

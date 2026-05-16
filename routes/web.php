@@ -26,6 +26,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('/users', 'user-management')
         ->middleware(['permission:view-users'])
         ->name('users.index');
+
+    // Role Management
+    Route::livewire('/roles', 'role-management')
+        ->middleware(['permission:view-roles'])
+        ->name('roles.index');
 });
 
 require __DIR__.'/settings.php';

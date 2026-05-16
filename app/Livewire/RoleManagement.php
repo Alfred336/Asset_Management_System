@@ -30,7 +30,8 @@ class RoleManagement extends Component
 
     public function render()
     {
-        $roles = Role::where('name', 'like', '%' . $this->search . '%')
+        $roles = Role::with('permissions')
+            ->where('name', 'like', '%' . $this->search . '%')
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
             ->paginate($this->perPage);
 
