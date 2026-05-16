@@ -2,52 +2,82 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use App\Models\Device;
 use App\Models\Company;
+use App\Models\Device;
 use App\Models\Staff;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class DeviceManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
+
     public $perPage = 10;
+
     public $sortField = 'created_at';
+
     public $sortAsc = false;
+
     public $companyFilter = '';
+
     public $statusFilter = '';
+
     public $deviceTypeFilter = '';
+
     public $showTrashed = false;
 
     // For create/edit modal
     public $showCreateModal = false;
+
     public $showEditModal = false;
 
     public $deviceId;
+
     public $company_id;
+
     public $staff_id;
+
     public $asset_tag;
+
     public $serial_number;
+
     public $model;
+
     public $manufacturer;
+
     public $device_type;
+
     public $operating_system;
+
     public $os_version;
+
     public $processor;
+
     public $ram_gb;
+
     public $storage_gb;
+
     public $storage_type;
+
     public $ip_address;
+
     public $mac_address;
+
     public $hostname;
+
     public $location;
+
     public $status;
+
     public $purchase_date;
+
     public $purchase_cost;
+
     public $warranty_expiry;
+
     public $notes;
 
     protected $rules = [
@@ -95,10 +125,10 @@ class DeviceManagement extends Component
 
         $deviceQuery = Device::with(['company', 'staff'])
             ->where(function ($query) {
-                $query->where('asset_tag', 'like', '%' . $this->search . '%')
-                    ->orWhere('serial_number', 'like', '%' . $this->search . '%')
-                    ->orWhere('model', 'like', '%' . $this->search . '%')
-                    ->orWhere('hostname', 'like', '%' . $this->search . '%');
+                $query->where('asset_tag', 'like', '%'.$this->search.'%')
+                    ->orWhere('serial_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('model', 'like', '%'.$this->search.'%')
+                    ->orWhere('hostname', 'like', '%'.$this->search.'%');
             })
             ->when($this->companyFilter, function ($query) {
                 $query->where('company_id', $this->companyFilter);
@@ -109,7 +139,7 @@ class DeviceManagement extends Component
             ->when($this->deviceTypeFilter, function ($query) {
                 $query->where('device_type', $this->deviceTypeFilter);
             })
-            ->when(!$this->showTrashed, function ($query) {
+            ->when(! $this->showTrashed, function ($query) {
                 $query->whereNull('deleted_at');
             })
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc');
@@ -133,7 +163,7 @@ class DeviceManagement extends Component
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
-            $this->sortAsc = !$this->sortAsc;
+            $this->sortAsc = ! $this->sortAsc;
         } else {
             $this->sortAsc = true;
         }
@@ -155,6 +185,7 @@ class DeviceManagement extends Component
         // Check if the user has permission to create devices
         if (Gate::denies('create-devices')) {
             session()->flash('error', 'You do not have permission to create devices.');
+
             return;
         }
 
@@ -195,6 +226,7 @@ class DeviceManagement extends Component
         // Check if the user has permission to edit devices
         if (Gate::denies('edit-devices')) {
             session()->flash('error', 'You do not have permission to edit devices.');
+
             return;
         }
 
@@ -228,8 +260,8 @@ class DeviceManagement extends Component
     public function update()
     {
         $this->validate([
-            'asset_tag' => 'required|string|max:100|unique:devices,asset_tag,' . $this->deviceId,
-            'serial_number' => 'nullable|string|max:100|unique:devices,serial_number,' . $this->deviceId,
+            'asset_tag' => 'required|string|max:100|unique:devices,asset_tag,'.$this->deviceId,
+            'serial_number' => 'nullable|string|max:100|unique:devices,serial_number,'.$this->deviceId,
             'mac_address' => 'nullable|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
             'ip_address' => 'nullable|ip',
             'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
@@ -238,6 +270,7 @@ class DeviceManagement extends Component
         // Check if the user has permission to edit devices
         if (Gate::denies('edit-devices')) {
             session()->flash('error', 'You do not have permission to edit devices.');
+
             return;
         }
 
@@ -277,6 +310,7 @@ class DeviceManagement extends Component
         // Check if the user has permission to delete devices
         if (Gate::denies('delete-devices')) {
             session()->flash('error', 'You do not have permission to delete devices.');
+
             return;
         }
 

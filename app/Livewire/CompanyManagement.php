@@ -2,31 +2,44 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Livewire\WithPagination;
 use App\Models\Company;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class CompanyManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
+
+    public $showTrashed = false;
+
     public $perPage = 10;
+
     public $sortField = 'created_at';
+
     public $sortAsc = false;
 
     // For create/edit modal
     public $showCreateModal = false;
+
     public $showEditModal = false;
 
     public $companyId;
+
     public $name;
+
     public $email;
+
     public $phone;
+
     public $website;
+
     public $address;
+
     public $tax_id;
+
     public $status;
 
     protected $rules = [
@@ -51,10 +64,10 @@ class CompanyManagement extends Component
     public function render()
     {
         $companies = Company::where(function ($query) {
-            $query->where('name', 'like', '%' . $this->search . '%')
-                ->orWhere('email', 'like', '%' . $this->search . '%');
+            $query->where('name', 'like', '%'.$this->search.'%')
+                ->orWhere('email', 'like', '%'.$this->search.'%');
         })
-            ->when(!$this->showTrashed, function ($query) {
+            ->when(! $this->showTrashed, function ($query) {
                 $query->whereNull('deleted_at');
             })
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
@@ -68,7 +81,7 @@ class CompanyManagement extends Component
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
-            $this->sortAsc = !$this->sortAsc;
+            $this->sortAsc = ! $this->sortAsc;
         } else {
             $this->sortAsc = true;
         }
@@ -90,6 +103,7 @@ class CompanyManagement extends Component
         // Check if the user has permission to create companies
         if (Gate::denies('create-companies')) {
             session()->flash('error', 'You do not have permission to create companies.');
+
             return;
         }
 
@@ -115,6 +129,7 @@ class CompanyManagement extends Component
         // Check if the user has permission to edit companies
         if (Gate::denies('edit-companies')) {
             session()->flash('error', 'You do not have permission to edit companies.');
+
             return;
         }
 
@@ -133,12 +148,13 @@ class CompanyManagement extends Component
     public function update()
     {
         $this->validate([
-            'email' => 'required|email|max:255|unique:companies,email,' . $this->companyId,
+            'email' => 'required|email|max:255|unique:companies,email,'.$this->companyId,
         ]);
 
         // Check if the user has permission to edit companies
         if (Gate::denies('edit-companies')) {
             session()->flash('error', 'You do not have permission to edit companies.');
+
             return;
         }
 
@@ -163,6 +179,7 @@ class CompanyManagement extends Component
         // Check if the user has permission to delete companies
         if (Gate::denies('delete-companies')) {
             session()->flash('error', 'You do not have permission to delete companies.');
+
             return;
         }
 

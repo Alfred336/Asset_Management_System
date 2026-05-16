@@ -18,6 +18,15 @@
                     <flux:sidebar.item icon="home" :href="route('companies.index')" :current="request()->routeIs('companies.index')" wire:navigate>
                         {{ __('Companies') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="users" :href="route('staff.index')" :current="request()->routeIs('staff.index')" wire:navigate>
+                        {{ __('Staff') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="computer-desktop" :href="route('devices.index')" :current="request()->routeIs('devices.index')" wire:navigate>
+                        {{ __('Devices') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="user-group" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>
+                        {{ __('Users') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -33,6 +42,10 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
+            <div class="px-2 pb-2 hidden lg:block">
+                <livewire:notification-bell type="sidebar" />
+            </div>
+
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
@@ -41,6 +54,8 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <livewire:notification-bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

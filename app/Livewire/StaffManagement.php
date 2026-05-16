@@ -2,37 +2,55 @@
 
 namespace App\Livewire;
 
+use App\Models\Company;
+use App\Models\Staff;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\Staff;
-use App\Models\Company;
-use Illuminate\Support\Facades\Gate;
 
 class StaffManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
+
+    public $showTrashed = false;
+
     public $perPage = 10;
+
     public $sortField = 'created_at';
+
     public $sortAsc = false;
+
     public $companyFilter = '';
 
     // For create/edit modal
     public $showCreateModal = false;
+
     public $showEditModal = false;
 
     public $staffId;
+
     public $company_id;
+
     public $first_name;
+
     public $last_name;
+
     public $email;
+
     public $phone;
+
     public $position;
+
     public $hire_date;
+
     public $salary;
+
     public $employment_type;
+
     public $status;
+
     public $notes;
 
     protected $rules = [
@@ -66,15 +84,15 @@ class StaffManagement extends Component
 
         $staffQuery = Staff::with('company')
             ->where(function ($query) {
-                $query->where('first_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%')
-                    ->orWhere('position', 'like', '%' . $this->search . '%');
+                $query->where('first_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%')
+                    ->orWhere('position', 'like', '%'.$this->search.'%');
             })
             ->when($this->companyFilter, function ($query) {
                 $query->where('company_id', $this->companyFilter);
             })
-            ->when(!$this->showTrashed, function ($query) {
+            ->when(! $this->showTrashed, function ($query) {
                 $query->whereNull('deleted_at');
             })
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc');
@@ -90,7 +108,7 @@ class StaffManagement extends Component
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
-            $this->sortAsc = !$this->sortAsc;
+            $this->sortAsc = ! $this->sortAsc;
         } else {
             $this->sortAsc = true;
         }
@@ -112,6 +130,7 @@ class StaffManagement extends Component
         // Check if the user has permission to create staff
         if (Gate::denies('create-staff')) {
             session()->flash('error', 'You do not have permission to create staff members.');
+
             return;
         }
 
@@ -141,6 +160,7 @@ class StaffManagement extends Component
         // Check if the user has permission to edit staff
         if (Gate::denies('edit-staff')) {
             session()->flash('error', 'You do not have permission to edit staff members.');
+
             return;
         }
 
@@ -163,12 +183,13 @@ class StaffManagement extends Component
     public function update()
     {
         $this->validate([
-            'email' => 'required|email|max:255|unique:staff,email,' . $this->staffId,
+            'email' => 'required|email|max:255|unique:staff,email,'.$this->staffId,
         ]);
 
         // Check if the user has permission to edit staff
         if (Gate::denies('edit-staff')) {
             session()->flash('error', 'You do not have permission to edit staff members.');
+
             return;
         }
 
@@ -197,6 +218,7 @@ class StaffManagement extends Component
         // Check if the user has permission to delete staff
         if (Gate::denies('delete-staff')) {
             session()->flash('error', 'You do not have permission to delete staff members.');
+
             return;
         }
 
