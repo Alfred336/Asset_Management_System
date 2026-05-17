@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Models\Role;
 
 class UserManagement extends Component
 {
@@ -23,22 +24,31 @@ class UserManagement extends Component
 
     // For create/edit modal
     public $showCreateModal = false;
+
     public $showEditModal = false;
 
     public $userId;
+
     public $name;
+
     public $email;
+
     public $email_verified_at;
+
     public $password;
+
     public $password_confirmation;
+
     public $status;
+
     public $selectedRole = '';
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255|unique:users,email',
         'password' => 'required|string|min:8|confirmed',
-        'status' => 'required:in:active,inactive',
+        'status' => 'required|in:active,inactive',
+        'selectedRole' => 'nullable|exists:roles,name',
     ];
 
     protected $messages = [
@@ -55,13 +65,13 @@ class UserManagement extends Component
     {
         $users = User::query()
             ->with('roles')
-            ->when($this->showTrashed, fn($q) => $q->withTrashed())
-            ->when(! $this->showTrashed, fn($q) => $q->whereNull('deleted_at'))
-            ->when($this->search, fn($q) => $q->where('name', 'like', '%'.$this->search.'%')->orWhere('email', 'like', '%'.$this->search.'%'))
+            ->when($this->showTrashed, fn ($q) => $q->withTrashed())
+            ->when(! $this->showTrashed, fn ($q) => $q->whereNull('deleted_at'))
+            ->when($this->search, fn ($q) => $q->where('name', 'like', '%'.$this->search.'%')->orWhere('email', 'like', '%'.$this->search.'%'))
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
             ->paginate($this->perPage);
 
-        $roles = \Spatie\Permission\Models\Role::orderBy('name')->get();
+        $roles = Role::orderBy('name')->get();
 
         return view('livewire.user-management', compact('users', 'roles'));
     }
@@ -87,7 +97,10 @@ class UserManagement extends Component
     public function create()
     {
         $this->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+            'selectedRole' => 'nullable|exists:roles,name',
         ]);
 
         // Check if the user has permission to create users
@@ -97,12 +110,16 @@ class UserManagement extends Component
             return;
         }
 
-        User::create([
+        $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
             'password' => bcrypt($this->password),
             'email_verified_at' => now(),
         ]);
+
+        if ($this->selectedRole) {
+            $user->assignRole($this->selectedRole);
+        }
 
         $this->showCreateModal = false;
         $this->resetInputFields();
@@ -115,6 +132,7 @@ class UserManagement extends Component
 
         if (Gate::denies('edit-user')) {
             session()->flash('error', 'You do not have permission to edit users.');
+
             return;
         }
 
@@ -131,19 +149,21 @@ class UserManagement extends Component
     {
         $this->validate([
             'email' => 'required|email|max:255|unique:users,email,'.$this->userId,
+            'selectedRole' => 'nullable|exists:roles,name',
         ]);
 
         if (Gate::denies('edit-user')) {
             session()->flash('error', 'You do not have permission to edit users.');
+
             return;
         }
 
         $user = User::withTrashed()->findOrFail($this->userId);
         $user->update(['name' => $this->name, 'email' => $this->email]);
 
-        if ($this->selectedRole) {
-            $user->syncRoles([$this->selectedRole]);
-        }
+        $this->selectedRole
+            ? $user->syncRoles([$this->selectedRole])
+            : $user->syncRoles([]);
 
         if ($this->status === 'inactive' && ! $user->trashed()) {
             $user->delete();

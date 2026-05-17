@@ -1,11 +1,9 @@
 <?php
 
-use Livewire\Volt\Component;
+use Livewire\Component;
 
 new class extends Component
 {
-    public $type = 'navbar'; // 'navbar' or 'sidebar'
-
     public function markAllAsRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
@@ -14,16 +12,14 @@ new class extends Component
 ?>
 
 <flux:dropdown>
-    @if($type === 'navbar')
-        <flux:navbar.item icon="bell" badge="{{ auth()->user()->unreadNotifications->count() ?: null }}" />
-    @else
-        <flux:sidebar.item icon="bell" badge="{{ auth()->user()->unreadNotifications->count() ?: null }}">
-            {{ __('Notifications') }}
-        </flux:sidebar.item>
-    @endif
+    <flux:button icon="bell" variant="ghost" size="sm">
+        @if(auth()->user()->unreadNotifications->count() > 0)
+            <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-medium text-white">{{ auth()->user()->unreadNotifications->count() }}</span>
+        @endif
+    </flux:button>
 
     <flux:menu class="w-80">
-        <flux:menu.header>{{ __('Notifications') }}</flux:menu.header>
+        <flux:menu.heading>{{ __('Notifications') }}</flux:menu.heading>
 
         <div class="max-h-96 overflow-y-auto">
             @forelse(auth()->user()->unreadNotifications->take(10) as $notification)

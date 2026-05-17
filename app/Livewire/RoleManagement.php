@@ -2,26 +2,32 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Gate;
+use Spatie\Permission\Models\Role;
 
 class RoleManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
+
     public $perPage = 10;
+
     public $sortField = 'name';
+
     public $sortAsc = true;
 
     public $showCreateModal = false;
+
     public $showEditModal = false;
 
     public $roleId;
+
     public $name;
+
     public $selectedPermissions = [];
 
     protected $rules = [
@@ -31,7 +37,7 @@ class RoleManagement extends Component
     public function render()
     {
         $roles = Role::with('permissions')
-            ->where('name', 'like', '%' . $this->search . '%')
+            ->where('name', 'like', '%'.$this->search.'%')
             ->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')
             ->paginate($this->perPage);
 
@@ -46,7 +52,7 @@ class RoleManagement extends Component
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
-            $this->sortAsc = !$this->sortAsc;
+            $this->sortAsc = ! $this->sortAsc;
         } else {
             $this->sortAsc = true;
         }
@@ -65,11 +71,10 @@ class RoleManagement extends Component
     {
         $this->validate();
 
-        if (Gate::denies('edit-roles')) { // We'll add this permission or just check Super Admin
-             if (!auth()->user()->hasRole('Super Admin')) {
-                session()->flash('error', 'Only Super Admins can manage roles.');
-                return;
-             }
+        if (Gate::denies('edit-roles')) {
+            session()->flash('error', 'You do not have permission to manage roles.');
+
+            return;
         }
 
         $role = Role::create(['name' => $this->name]);
@@ -82,8 +87,9 @@ class RoleManagement extends Component
 
     public function edit($id)
     {
-        if (!auth()->user()->hasRole('Super Admin')) {
-            session()->flash('error', 'Only Super Admins can manage roles.');
+        if (Gate::denies('edit-roles')) {
+            session()->flash('error', 'You do not have permission to manage roles.');
+
             return;
         }
 
@@ -98,11 +104,12 @@ class RoleManagement extends Component
     public function update()
     {
         $this->validate([
-            'name' => 'required|string|max:255|unique:roles,name,' . $this->roleId,
+            'name' => 'required|string|max:255|unique:roles,name,'.$this->roleId,
         ]);
 
-        if (!auth()->user()->hasRole('Super Admin')) {
-            session()->flash('error', 'Only Super Admins can manage roles.');
+        if (Gate::denies('edit-roles')) {
+            session()->flash('error', 'You do not have permission to manage roles.');
+
             return;
         }
 
@@ -117,15 +124,17 @@ class RoleManagement extends Component
 
     public function delete($id)
     {
-        if (!auth()->user()->hasRole('Super Admin')) {
-            session()->flash('error', 'Only Super Admins can manage roles.');
+        if (Gate::denies('edit-roles')) {
+            session()->flash('error', 'You do not have permission to manage roles.');
+
             return;
         }
 
         $role = Role::findOrFail($id);
-        
+
         if ($role->name === 'Super Admin') {
             session()->flash('error', 'The Super Admin role cannot be deleted.');
+
             return;
         }
 

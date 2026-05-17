@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('app:check-device-warranty-expiry')->daily();
+Schedule::command('app:send-daily-status-update-reminders')->dailyAt('08:00');
+Schedule::command('app:send-weekly-device-report')->fridays()->at('16:00');

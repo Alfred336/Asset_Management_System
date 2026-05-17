@@ -24,6 +24,8 @@ class PermissionsSeeder extends Seeder
             'view-companies',
             'view-devices',
             'view-roles',
+            'edit-roles',
+            'view-dashboard',
             'create-user',
             'edit-user',
             'delete-user',
@@ -31,12 +33,17 @@ class PermissionsSeeder extends Seeder
             'create-companies',
             'edit-companies',
             'delete-companies',
+            'restore-companies',
             'create-devices',
             'edit-devices',
             'delete-devices',
+            'restore-devices',
+            'update-device-status',
+            'view-device-status-history',
             'create-staff',
             'edit-staff',
             'delete-staff',
+            'restore-staff',
         ];
 
         foreach ($permissions as $permission) {
@@ -57,10 +64,19 @@ class PermissionsSeeder extends Seeder
             'view-users',
             'view-companies',
             'view-devices',
+            'view-dashboard',
             'create-devices',
             'edit-devices',
             'create-staff',
             'edit-staff',
+        ]);
+
+        $role4 = Role::firstOrCreate(['name' => 'Technician']);
+        $role4->syncPermissions([
+            'view-devices',
+            'view-dashboard',
+            'update-device-status',
+            'view-device-status-history',
         ]);
     }
 }

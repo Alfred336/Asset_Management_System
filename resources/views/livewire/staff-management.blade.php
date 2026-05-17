@@ -22,6 +22,7 @@
                     <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
                 @endforeach
             </flux:select>
+            <flux:checkbox wire:model.live="showTrashed" label="Show deleted staff" />
         </div>
     </div>
 
@@ -53,24 +54,74 @@
                                 default => 'zinc',
                             };
                         @endphp
-                        <flux:badge :color="$statusColor">
-                            {{ ucfirst(str_replace('_', ' ', $member->status)) }}
-                        </flux:badge>
+                        @if($member->trashed())
+                            <flux:badge color="danger">Deleted</flux:badge>
+                        @else
+                            <flux:badge :color="$statusColor">
+                                {{ ucfirst(str_replace('_', ' ', $member->status)) }}
+                            </flux:badge>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell align="end">
                         <flux:button.group>
-                            @can('edit-staff')
-                                <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $member->id }})" />
-                            @endcan
-                            @can('delete-staff')
-                                <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $member->id }})" />
-                            @endcan
+                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDetails({{ $member->id }})" />
+                            @if(!$member->trashed())
+                                @can('edit-staff')
+                                    <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $member->id }})" />
+                                @endcan
+                                @can('delete-staff')
+                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $member->id }})" />
+                                @endcan
+                            @else
+                                @can('restore-staff')
+                                    <flux:button variant="ghost" size="sm" icon="arrow-path" wire:click="restore({{ $member->id }})" />
+                                @endcan
+                            @endif
                         </flux:button.group>
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
         </flux:table.rows>
     </flux:table>
+
+    <!-- Details Modal -->
+    <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
+        <div>
+            <flux:heading size="lg">{{ $viewingStaff['full_name'] ?? 'Staff Details' }}</flux:heading>
+            <flux:subheading>{{ $viewingStaff['position'] ?? 'View staff information.' }}</flux:subheading>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            @foreach([
+                'Name' => $viewingStaff['full_name'] ?? null,
+                'Email' => $viewingStaff['email'] ?? null,
+                'Phone' => $viewingStaff['phone'] ?? null,
+                'Company' => $viewingStaff['company'] ?? null,
+                'Position' => $viewingStaff['position'] ?? null,
+                'Hire Date' => $viewingStaff['hire_date'] ?? null,
+                'Salary' => $viewingStaff['salary'] ?? null,
+                'Employment Type' => $viewingStaff['employment_type'] ?? null,
+                'Status' => $viewingStaff['status'] ?? null,
+                'Assigned Devices' => $viewingStaff['devices'] ?? null,
+                'Deleted At' => $viewingStaff['deleted_at'] ?? null,
+            ] as $label => $value)
+                <div>
+                    <div class="text-xs font-medium text-zinc-500">{{ $label }}</div>
+                    <div class="mt-1 text-zinc-900 dark:text-zinc-100">{{ filled($value) ? $value : 'N/A' }}</div>
+                </div>
+            @endforeach
+
+            <div class="md:col-span-2">
+                <div class="text-xs font-medium text-zinc-500">Notes</div>
+                <div class="mt-1 whitespace-pre-line text-zinc-900 dark:text-zinc-100">{{ filled($viewingStaff['notes'] ?? null) ? $viewingStaff['notes'] : 'N/A' }}</div>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <flux:spacer />
+            <flux:button variant="primary" wire:click="showDetailsModal = false">Close</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" variant="wide" class="space-y-6">

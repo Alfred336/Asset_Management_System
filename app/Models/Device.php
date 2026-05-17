@@ -43,25 +43,16 @@ class Device extends Model
         'status' => 'string',
     ];
 
-    /**
-     * Get the company that owns the device.
-     */
     public function company()
     {
         return $this->belongsTo(Company::class);
     }
 
-    /**
-     * Get the staff member assigned to the device.
-     */
     public function staff()
     {
         return $this->belongsTo(Staff::class);
     }
 
-    /**
-     * Get the status history for the device.
-     */
     public function statusHistory()
     {
         return $this->hasMany(DeviceStatusHistory::class)->orderBy('created_at', 'desc');

@@ -34,6 +34,10 @@ class DeviceManagement extends Component
 
     public $showEditModal = false;
 
+    public $showDetailsModal = false;
+
+    public array $viewingDevice = [];
+
     public $deviceId;
 
     public $company_id;
@@ -124,6 +128,7 @@ class DeviceManagement extends Component
         $staff = Staff::where('status', 'active')->get();
 
         $deviceQuery = Device::with(['company', 'staff'])
+            ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
                 $query->where('asset_tag', 'like', '%'.$this->search.'%')
                     ->orWhere('serial_number', 'like', '%'.$this->search.'%')
@@ -221,7 +226,7 @@ class DeviceManagement extends Component
 
     public function edit($id)
     {
-        $device = Device::with(['company', 'staff'])->findOrFail($id);
+        $device = Device::withTrashed()->with(['company', 'staff'])->findOrFail($id);
 
         // Check if the user has permission to edit devices
         if (Gate::denies('edit-devices')) {
@@ -257,6 +262,43 @@ class DeviceManagement extends Component
         $this->showEditModal = true;
     }
 
+    public function viewDetails($id)
+    {
+        if (Gate::denies('view-devices')) {
+            session()->flash('error', 'You do not have permission to view devices.');
+
+            return;
+        }
+
+        $device = Device::withTrashed()->with(['company', 'staff'])->findOrFail($id);
+
+        $this->viewingDevice = [
+            'asset_tag' => $device->asset_tag,
+            'serial_number' => $device->serial_number,
+            'model' => $device->model,
+            'manufacturer' => $device->manufacturer,
+            'device_type' => $device->device_type,
+            'operating_system' => trim(collect([$device->operating_system, $device->os_version])->filter()->join(' ')),
+            'processor' => $device->processor,
+            'ram' => $device->ram_gb ? $device->ram_gb.' GB' : null,
+            'storage' => $device->storage_gb ? trim($device->storage_gb.' GB '.$device->storage_type) : $device->storage_type,
+            'ip_address' => $device->ip_address,
+            'mac_address' => $device->mac_address,
+            'hostname' => $device->hostname,
+            'location' => $device->location,
+            'company' => $device->company?->name,
+            'staff' => $device->staff?->full_name,
+            'status' => ucfirst(str_replace('_', ' ', $device->status)),
+            'purchase_date' => $device->purchase_date?->format('Y-m-d'),
+            'purchase_cost' => $device->purchase_cost ? number_format((float) $device->purchase_cost, 2) : null,
+            'warranty_expiry' => $device->warranty_expiry?->format('Y-m-d'),
+            'notes' => $device->notes,
+            'deleted_at' => $device->deleted_at?->format('Y-m-d H:i'),
+        ];
+
+        $this->showDetailsModal = true;
+    }
+
     public function update()
     {
         $this->validate([
@@ -274,7 +316,7 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::findOrFail($this->deviceId);
+        $device = Device::withTrashed()->findOrFail($this->deviceId);
         $device->update([
             'company_id' => $this->company_id,
             'staff_id' => $this->staff_id,
@@ -318,6 +360,20 @@ class DeviceManagement extends Component
         $device->delete();
 
         session()->flash('message', 'Device deleted successfully.');
+    }
+
+    public function restore($id)
+    {
+        if (Gate::denies('restore-devices')) {
+            session()->flash('error', 'You do not have permission to restore devices.');
+
+            return;
+        }
+
+        $device = Device::withTrashed()->findOrFail($id);
+        $device->restore();
+
+        session()->flash('message', 'Device restored successfully.');
     }
 
     public function resetInputFields()

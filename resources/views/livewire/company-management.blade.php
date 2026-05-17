@@ -15,6 +15,7 @@
         <div class="flex-1">
             <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search companies by name, email..." />
         </div>
+        <flux:checkbox wire:model.live="showTrashed" label="Show deleted companies" />
     </div>
 
     <!-- Table -->
@@ -34,31 +35,79 @@
                     <flux:table.cell>{{ $company->email }}</flux:table.cell>
                     <flux:table.cell>{{ $company->phone ?? 'N/A' }}</flux:table.cell>
                     <flux:table.cell>
-                        @php
-                            $statusColor = match($company->status) {
-                                'active' => 'success',
-                                'inactive' => 'zinc',
-                                default => 'zinc',
-                            };
-                        @endphp
-                        <flux:badge :color="$statusColor">
-                            {{ ucfirst($company->status) }}
-                        </flux:badge>
+                        @if($company->trashed())
+                            <flux:badge color="danger">Deleted</flux:badge>
+                        @else
+                            @php
+                                $statusColor = match($company->status) {
+                                    'active' => 'success',
+                                    'inactive' => 'zinc',
+                                    default => 'zinc',
+                                };
+                            @endphp
+                            <flux:badge :color="$statusColor">
+                                {{ ucfirst($company->status) }}
+                            </flux:badge>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell align="end">
                         <flux:button.group>
-                            @can('edit-companies')
-                                <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $company->id }})" />
-                            @endcan
-                            @can('delete-companies')
-                                <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $company->id }})" />
-                            @endcan
+                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDetails({{ $company->id }})" />
+                            @if(!$company->trashed())
+                                @can('edit-companies')
+                                    <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $company->id }})" />
+                                @endcan
+                                @can('delete-companies')
+                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $company->id }})" />
+                                @endcan
+                            @else
+                                @can('restore-companies')
+                                    <flux:button variant="ghost" size="sm" icon="arrow-path" wire:click="restore({{ $company->id }})" />
+                                @endcan
+                            @endif
                         </flux:button.group>
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
         </flux:table.rows>
     </flux:table>
+
+    <!-- Details Modal -->
+    <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
+        <div>
+            <flux:heading size="lg">{{ $viewingCompany['name'] ?? 'Company Details' }}</flux:heading>
+            <flux:subheading>{{ $viewingCompany['email'] ?? 'View company information.' }}</flux:subheading>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            @foreach([
+                'Name' => $viewingCompany['name'] ?? null,
+                'Email' => $viewingCompany['email'] ?? null,
+                'Phone' => $viewingCompany['phone'] ?? null,
+                'Website' => $viewingCompany['website'] ?? null,
+                'Tax ID' => $viewingCompany['tax_id'] ?? null,
+                'Status' => $viewingCompany['status'] ?? null,
+                'Staff Count' => $viewingCompany['staff_count'] ?? null,
+                'Device Count' => $viewingCompany['device_count'] ?? null,
+                'Deleted At' => $viewingCompany['deleted_at'] ?? null,
+            ] as $label => $value)
+                <div>
+                    <div class="text-xs font-medium text-zinc-500">{{ $label }}</div>
+                    <div class="mt-1 text-zinc-900 dark:text-zinc-100">{{ filled($value) ? $value : 'N/A' }}</div>
+                </div>
+            @endforeach
+
+            <div class="md:col-span-2">
+                <div class="text-xs font-medium text-zinc-500">Address</div>
+                <div class="mt-1 whitespace-pre-line text-zinc-900 dark:text-zinc-100">{{ filled($viewingCompany['address'] ?? null) ? $viewingCompany['address'] : 'N/A' }}</div>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <flux:spacer />
+            <flux:button variant="primary" wire:click="showDetailsModal = false">Close</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" variant="wide" class="space-y-6">

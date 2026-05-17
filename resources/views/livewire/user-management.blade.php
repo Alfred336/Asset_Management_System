@@ -80,6 +80,12 @@
                 <flux:input type="password" wire:model="password" label="Password" required />
                 <flux:input type="password" wire:model="password_confirmation" label="Confirm Password" required />
             </div>
+            <flux:select wire:model="selectedRole" label="Role">
+                <flux:select.option value="">— No Role —</flux:select.option>
+                @foreach($roles as $role)
+                    <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
+                @endforeach
+            </flux:select>
             <div class="flex gap-2 pt-2">
                 <flux:spacer />
                 <flux:button variant="ghost" wire:click="showCreateModal = false">Cancel</flux:button>

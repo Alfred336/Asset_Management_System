@@ -1,22 +1,31 @@
 <?php
 
+use App\Livewire\VerifyEmailCode;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
 // Email verification with OTP code
 Route::middleware('auth')->group(function () {
-    Route::get('/email/verify', \App\Livewire\VerifyEmailCode::class)
+    Route::get('/email/verify', VerifyEmailCode::class)
         ->name('verification.notice');
 
     Route::post('/email/verification-notification', function () {
-        app(\App\Livewire\VerifyEmailCode::class)->sendCode();
+        app(VerifyEmailCode::class)->sendCode();
+
         return back()->with('status', 'verification-link-sent');
     })->middleware('throttle:6,1')->name('verification.send');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::view('dashboard', 'dashboard')
+        ->middleware(['permission:view-dashboard'])
+        ->name('dashboard');
+
+    // Device Status Manager
+    Route::livewire('/technician', 'device-status-manager')
+        ->middleware(['permission:view-devices'])
+        ->name('technician.dashboard');
 
     // Company Management
     Route::livewire('/companies', 'company-management')

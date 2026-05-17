@@ -29,6 +29,10 @@ class StaffManagement extends Component
 
     public $showEditModal = false;
 
+    public $showDetailsModal = false;
+
+    public array $viewingStaff = [];
+
     public $staffId;
 
     public $company_id;
@@ -83,6 +87,7 @@ class StaffManagement extends Component
         $companies = Company::where('status', 'active')->get();
 
         $staffQuery = Staff::with('company')
+            ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
                 $query->where('first_name', 'like', '%'.$this->search.'%')
                     ->orWhere('last_name', 'like', '%'.$this->search.'%')
@@ -155,7 +160,7 @@ class StaffManagement extends Component
 
     public function edit($id)
     {
-        $staff = Staff::with('company')->findOrFail($id);
+        $staff = Staff::withTrashed()->with('company')->findOrFail($id);
 
         // Check if the user has permission to edit staff
         if (Gate::denies('edit-staff')) {
@@ -180,6 +185,34 @@ class StaffManagement extends Component
         $this->showEditModal = true;
     }
 
+    public function viewDetails($id)
+    {
+        if (Gate::denies('view-staff')) {
+            session()->flash('error', 'You do not have permission to view staff members.');
+
+            return;
+        }
+
+        $staff = Staff::withTrashed()->with(['company', 'devices'])->findOrFail($id);
+
+        $this->viewingStaff = [
+            'full_name' => $staff->full_name,
+            'email' => $staff->email,
+            'phone' => $staff->phone,
+            'company' => $staff->company?->name,
+            'position' => $staff->position,
+            'hire_date' => $staff->hire_date?->format('Y-m-d'),
+            'salary' => $staff->salary ? number_format((float) $staff->salary, 2) : null,
+            'employment_type' => ucfirst(str_replace('_', ' ', $staff->employment_type)),
+            'status' => ucfirst(str_replace('_', ' ', $staff->status)),
+            'devices' => $staff->devices->pluck('asset_tag')->join(', '),
+            'notes' => $staff->notes,
+            'deleted_at' => $staff->deleted_at?->format('Y-m-d H:i'),
+        ];
+
+        $this->showDetailsModal = true;
+    }
+
     public function update()
     {
         $this->validate([
@@ -193,7 +226,7 @@ class StaffManagement extends Component
             return;
         }
 
-        $staff = Staff::findOrFail($this->staffId);
+        $staff = Staff::withTrashed()->findOrFail($this->staffId);
         $staff->update([
             'company_id' => $this->company_id,
             'first_name' => $this->first_name,
@@ -226,6 +259,20 @@ class StaffManagement extends Component
         $staff->delete();
 
         session()->flash('message', 'Staff member deleted successfully.');
+    }
+
+    public function restore($id)
+    {
+        if (Gate::denies('restore-staff')) {
+            session()->flash('error', 'You do not have permission to restore staff members.');
+
+            return;
+        }
+
+        $staff = Staff::withTrashed()->findOrFail($id);
+        $staff->restore();
+
+        session()->flash('message', 'Staff member restored successfully.');
     }
 
     public function resetInputFields()

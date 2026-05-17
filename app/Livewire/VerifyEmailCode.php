@@ -9,6 +9,7 @@ use Livewire\Component;
 class VerifyEmailCode extends Component
 {
     public string $code = '';
+
     public bool $codeSent = false;
 
     public function mount(): void
@@ -46,6 +47,7 @@ class VerifyEmailCode extends Component
             now()->isAfter($user->email_verification_expires_at)
         ) {
             $this->addError('code', 'Invalid or expired code. Please request a new one.');
+
             return;
         }
 

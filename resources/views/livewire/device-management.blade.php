@@ -15,7 +15,7 @@
         <div class="flex-1">
             <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search devices by tag, serial, model..." />
         </div>
-        <div class="flex gap-4">
+        <div class="flex flex-wrap gap-4">
             <flux:select wire:model.live="companyFilter" placeholder="All Companies">
                 <flux:select.option value="">All Companies</flux:select.option>
                 @foreach($companies as $company)
@@ -34,6 +34,7 @@
                     <flux:select.option value="{{ $type }}">{{ ucfirst($type) }}</flux:select.option>
                 @endforeach
             </flux:select>
+            <flux:checkbox wire:model.live="showTrashed" label="Show deleted devices" />
         </div>
     </div>
 
@@ -72,9 +73,13 @@
                                 default => 'zinc',
                             };
                         @endphp
-                        <flux:badge :color="$statusColor">
-                            {{ ucfirst(str_replace('_', ' ', $device->status)) }}
-                        </flux:badge>
+                        @if($device->trashed())
+                            <flux:badge color="danger">Deleted</flux:badge>
+                        @else
+                            <flux:badge :color="$statusColor">
+                                {{ ucfirst(str_replace('_', ' ', $device->status)) }}
+                            </flux:badge>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($device->warranty_expiry)
@@ -91,18 +96,73 @@
                     </flux:table.cell>
                     <flux:table.cell align="end">
                         <flux:button.group>
-                            @can('edit-devices')
-                                <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $device->id }})" />
-                            @endcan
-                            @can('delete-devices')
-                                <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $device->id }})" />
-                            @endcan
+                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDetails({{ $device->id }})" />
+                            @if(!$device->trashed())
+                                @can('edit-devices')
+                                    <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $device->id }})" />
+                                @endcan
+                                @can('delete-devices')
+                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $device->id }})" />
+                                @endcan
+                            @else
+                                @can('restore-devices')
+                                    <flux:button variant="ghost" size="sm" icon="arrow-path" wire:click="restore({{ $device->id }})" />
+                                @endcan
+                            @endif
                         </flux:button.group>
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
         </flux:table.rows>
     </flux:table>
+
+    <!-- Details Modal -->
+    <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
+        <div>
+            <flux:heading size="lg">{{ $viewingDevice['asset_tag'] ?? 'Device Details' }}</flux:heading>
+            <flux:subheading>{{ $viewingDevice['model'] ?? 'View device information.' }}</flux:subheading>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            @foreach([
+                'Asset Tag' => $viewingDevice['asset_tag'] ?? null,
+                'Serial Number' => $viewingDevice['serial_number'] ?? null,
+                'Model' => $viewingDevice['model'] ?? null,
+                'Manufacturer' => $viewingDevice['manufacturer'] ?? null,
+                'Device Type' => $viewingDevice['device_type'] ?? null,
+                'Operating System' => $viewingDevice['operating_system'] ?? null,
+                'Processor' => $viewingDevice['processor'] ?? null,
+                'RAM' => $viewingDevice['ram'] ?? null,
+                'Storage' => $viewingDevice['storage'] ?? null,
+                'IP Address' => $viewingDevice['ip_address'] ?? null,
+                'MAC Address' => $viewingDevice['mac_address'] ?? null,
+                'Hostname' => $viewingDevice['hostname'] ?? null,
+                'Location' => $viewingDevice['location'] ?? null,
+                'Company' => $viewingDevice['company'] ?? null,
+                'Assigned Staff' => $viewingDevice['staff'] ?? null,
+                'Status' => $viewingDevice['status'] ?? null,
+                'Purchase Date' => $viewingDevice['purchase_date'] ?? null,
+                'Purchase Cost' => $viewingDevice['purchase_cost'] ?? null,
+                'Warranty Expiry' => $viewingDevice['warranty_expiry'] ?? null,
+                'Deleted At' => $viewingDevice['deleted_at'] ?? null,
+            ] as $label => $value)
+                <div>
+                    <div class="text-xs font-medium text-zinc-500">{{ $label }}</div>
+                    <div class="mt-1 text-zinc-900 dark:text-zinc-100">{{ filled($value) ? $value : 'N/A' }}</div>
+                </div>
+            @endforeach
+
+            <div class="md:col-span-2">
+                <div class="text-xs font-medium text-zinc-500">Notes</div>
+                <div class="mt-1 whitespace-pre-line text-zinc-900 dark:text-zinc-100">{{ filled($viewingDevice['notes'] ?? null) ? $viewingDevice['notes'] : 'N/A' }}</div>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <flux:spacer />
+            <flux:button variant="primary" wire:click="showDetailsModal = false">Close</flux:button>
+        </div>
+    </flux:modal>
 
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" variant="wide" class="space-y-6">

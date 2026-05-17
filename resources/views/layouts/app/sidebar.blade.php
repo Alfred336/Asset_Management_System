@@ -11,13 +11,16 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
-                    <flux:sidebar.item icon="home" :href="route('companies.index')" :current="request()->routeIs('companies.index')" wire:navigate>
-                        {{ __('Companies') }}
-                    </flux:sidebar.item>
+<flux:sidebar.group :heading="__('Platform')" class="grid">
+                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                         {{ __('Dashboard') }}
+                     </flux:sidebar.item>
+                     <flux:sidebar.item icon="computer-desktop" :href="route('technician.dashboard')" :current="request()->routeIs('technician.dashboard')" wire:navigate>
+                         {{ __('Device Status') }}
+                     </flux:sidebar.item>
+                     <flux:sidebar.item icon="home" :href="route('companies.index')" :current="request()->routeIs('companies.index')" wire:navigate>
+                         {{ __('Companies') }}
+                     </flux:sidebar.item>
                     <flux:sidebar.item icon="users" :href="route('staff.index')" :current="request()->routeIs('staff.index')" wire:navigate>
                         {{ __('Staff') }}
                     </flux:sidebar.item>

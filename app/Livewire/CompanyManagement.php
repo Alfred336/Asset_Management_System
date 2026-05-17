@@ -26,6 +26,10 @@ class CompanyManagement extends Component
 
     public $showEditModal = false;
 
+    public $showDetailsModal = false;
+
+    public array $viewingCompany = [];
+
     public $companyId;
 
     public $name;
@@ -63,10 +67,12 @@ class CompanyManagement extends Component
 
     public function render()
     {
-        $companies = Company::where(function ($query) {
-            $query->where('name', 'like', '%'.$this->search.'%')
-                ->orWhere('email', 'like', '%'.$this->search.'%');
-        })
+        $companies = Company::query()
+            ->when($this->showTrashed, fn ($query) => $query->withTrashed())
+            ->where(function ($query) {
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
+            })
             ->when(! $this->showTrashed, function ($query) {
                 $query->whereNull('deleted_at');
             })
@@ -124,7 +130,7 @@ class CompanyManagement extends Component
 
     public function edit($id)
     {
-        $company = Company::findOrFail($id);
+        $company = Company::withTrashed()->findOrFail($id);
 
         // Check if the user has permission to edit companies
         if (Gate::denies('edit-companies')) {
@@ -145,6 +151,34 @@ class CompanyManagement extends Component
         $this->showEditModal = true;
     }
 
+    public function viewDetails($id)
+    {
+        if (Gate::denies('view-companies')) {
+            session()->flash('error', 'You do not have permission to view companies.');
+
+            return;
+        }
+
+        $company = Company::withTrashed()
+            ->withCount(['staff', 'devices'])
+            ->findOrFail($id);
+
+        $this->viewingCompany = [
+            'name' => $company->name,
+            'email' => $company->email,
+            'phone' => $company->phone,
+            'website' => $company->website,
+            'tax_id' => $company->tax_id,
+            'status' => ucfirst($company->status),
+            'staff_count' => $company->staff_count,
+            'device_count' => $company->devices_count,
+            'address' => $company->address,
+            'deleted_at' => $company->deleted_at?->format('Y-m-d H:i'),
+        ];
+
+        $this->showDetailsModal = true;
+    }
+
     public function update()
     {
         $this->validate([
@@ -158,7 +192,7 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::findOrFail($this->companyId);
+        $company = Company::withTrashed()->findOrFail($this->companyId);
         $company->update([
             'name' => $this->name,
             'email' => $this->email,
@@ -187,6 +221,20 @@ class CompanyManagement extends Component
         $company->delete();
 
         session()->flash('message', 'Company deleted successfully.');
+    }
+
+    public function restore($id)
+    {
+        if (Gate::denies('restore-companies')) {
+            session()->flash('error', 'You do not have permission to restore companies.');
+
+            return;
+        }
+
+        $company = Company::withTrashed()->findOrFail($id);
+        $company->restore();
+
+        session()->flash('message', 'Company restored successfully.');
     }
 
     public function resetInputFields()
