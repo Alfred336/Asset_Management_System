@@ -19,7 +19,6 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')
-        ->middleware(['permission:view-dashboard'])
         ->name('dashboard');
 
     // Device Status Manager

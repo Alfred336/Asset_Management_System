@@ -57,6 +57,11 @@ class StaffManagement extends Component
 
     public $notes;
 
+    // Delete confirmation
+    public $showDeleteConfirmation = false;
+
+    public $idToDelete = null;
+
     protected $rules = [
         'company_id' => 'required|exists:companies,id',
         'first_name' => 'required|string|max:255',
@@ -215,9 +220,10 @@ class StaffManagement extends Component
 
     public function update()
     {
-        $this->validate([
-            'email' => 'required|email|max:255|unique:staff,email,'.$this->staffId,
-        ]);
+        $rules = $this->rules;
+        $rules['email'] = 'required|email|max:255|unique:staff,email,'.$this->staffId;
+
+        $this->validate($rules);
 
         // Check if the user has permission to edit staff
         if (Gate::denies('edit-staff')) {
@@ -248,15 +254,28 @@ class StaffManagement extends Component
 
     public function delete($id)
     {
-        // Check if the user has permission to delete staff
+        // Check if the user has permission to delete staff members
         if (Gate::denies('delete-staff')) {
             session()->flash('error', 'You do not have permission to delete staff members.');
 
             return;
         }
 
-        $staff = Staff::findOrFail($id);
+        $this->idToDelete = $id;
+        $this->showDeleteConfirmation = true;
+    }
+
+    public function confirmDelete()
+    {
+        if (! $this->idToDelete) {
+            return;
+        }
+
+        $staff = Staff::findOrFail($this->idToDelete);
         $staff->delete();
+
+        $this->showDeleteConfirmation = false;
+        $this->idToDelete = null;
 
         session()->flash('message', 'Staff member deleted successfully.');
     }

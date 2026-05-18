@@ -2,15 +2,21 @@
 
 namespace App\Livewire;
 
+use App\Exports\DevicesExport;
+use App\Imports\DevicesImport;
 use App\Models\Company;
 use App\Models\Device;
 use App\Models\Staff;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class DeviceManagement extends Component
 {
+    use WithFileUploads;
     use WithPagination;
 
     public $search = '';
@@ -37,6 +43,20 @@ class DeviceManagement extends Component
     public $showDetailsModal = false;
 
     public array $viewingDevice = [];
+
+    public $selectedIds = [];
+
+    public $selectAll = false;
+
+    public $showBulkEditModal = false;
+
+    public $showBulkAssignModal = false;
+
+    public $bulk_status = '';
+
+    public $bulk_company_id = '';
+
+    public $bulk_staff_id = '';
 
     public $deviceId;
 
@@ -83,6 +103,18 @@ class DeviceManagement extends Component
     public $warranty_expiry;
 
     public $notes;
+
+    // Import
+    public $showImportModal = false;
+
+    public $importFile;
+
+    public array $importErrors = [];
+
+    // Delete confirmation
+    public $showDeleteConfirmation = false;
+
+    public $idToDelete = null;
 
     protected $rules = [
         'company_id' => 'required|exists:companies,id',
@@ -301,13 +333,11 @@ class DeviceManagement extends Component
 
     public function update()
     {
-        $this->validate([
-            'asset_tag' => 'required|string|max:100|unique:devices,asset_tag,'.$this->deviceId,
-            'serial_number' => 'nullable|string|max:100|unique:devices,serial_number,'.$this->deviceId,
-            'mac_address' => 'nullable|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
-            'ip_address' => 'nullable|ip',
-            'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
-        ]);
+        $rules = $this->rules;
+        $rules['asset_tag'] = 'required|string|max:100|unique:devices,asset_tag,'.$this->deviceId;
+        $rules['serial_number'] = 'nullable|string|max:100|unique:devices,serial_number,'.$this->deviceId;
+
+        $this->validate($rules);
 
         // Check if the user has permission to edit devices
         if (Gate::denies('edit-devices')) {
@@ -356,8 +386,21 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::findOrFail($id);
+        $this->idToDelete = $id;
+        $this->showDeleteConfirmation = true;
+    }
+
+    public function confirmDelete()
+    {
+        if (! $this->idToDelete) {
+            return;
+        }
+
+        $device = Device::findOrFail($this->idToDelete);
         $device->delete();
+
+        $this->showDeleteConfirmation = false;
+        $this->idToDelete = null;
 
         session()->flash('message', 'Device deleted successfully.');
     }
@@ -374,6 +417,49 @@ class DeviceManagement extends Component
         $device->restore();
 
         session()->flash('message', 'Device restored successfully.');
+    }
+
+    public function export()
+    {
+        if (Gate::denies('view-devices')) {
+            session()->flash('error', 'You do not have permission to export devices.');
+
+            return;
+        }
+
+        return Excel::download(new DevicesExport, 'devices-'.now()->format('Y-m-d-His').'.xlsx');
+    }
+
+    public function import()
+    {
+        if (Gate::denies('create-devices')) {
+            session()->flash('error', 'You do not have permission to import devices.');
+
+            return;
+        }
+
+        $this->validate([
+            'importFile' => 'required|mimes:xlsx,xls,csv|max:10240', // 10MB max
+        ]);
+
+        try {
+            Excel::import(new DevicesImport, $this->importFile->getRealPath());
+
+            $this->showImportModal = false;
+            $this->importFile = null;
+            $this->importErrors = [];
+
+            session()->flash('message', 'Devices imported successfully.');
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $this->importErrors = [];
+
+            foreach ($failures as $failure) {
+                $this->importErrors[] = 'Row '.$failure->row().' ('.$failure->attribute().'): '.implode(', ', $failure->errors());
+            }
+        } catch (\Exception $e) {
+            $this->importErrors = ['An error occurred during import: '.$e->getMessage()];
+        }
     }
 
     public function resetInputFields()

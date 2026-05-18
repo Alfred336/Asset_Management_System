@@ -1,88 +1,112 @@
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="space-y-8 p-4 lg:p-0">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-            <flux:heading size="xl" level="1">Staff Members</flux:heading>
-            <flux:subheading>Manage employees across different companies.</flux:subheading>
+            <flux:heading size="xl" level="1" class="font-black tracking-tight">Workforce Registry</flux:heading>
+            <flux:subheading>Personnel management across all business units.</flux:subheading>
         </div>
 
         @can('create-staff')
-            <flux:button icon="plus" variant="primary" wire:click="creating">Add Staff</flux:button>
+            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Onboard Personnel</flux:button>
         @endcan
     </div>
+
+    @if (session()->has('message'))
+        <flux:badge color="success" class="w-full justify-center py-3 rounded-xl border-emerald-100 dark:border-emerald-900/30">{{ session('message') }}</flux:badge>
+    @endif
+
+    @if (session()->has('error'))
+        <flux:badge color="danger" class="w-full justify-center py-2">{{ session('error') }}</flux:badge>
+    @endif
 
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search staff by name, email..." />
+            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search personnel..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
         </div>
-        <div class="flex gap-4">
-            <flux:select wire:model.live="companyFilter" placeholder="All Companies">
+        <div class="flex items-center gap-4">
+            <flux:select wire:model.live="companyFilter" placeholder="All Companies" class="min-w-[160px]">
                 <flux:select.option value="">All Companies</flux:select.option>
                 @foreach($companies as $company)
                     <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
                 @endforeach
             </flux:select>
-            <flux:checkbox wire:model.live="showTrashed" label="Show deleted staff" />
+            <flux:checkbox wire:model.live="showTrashed" label="Archive" />
         </div>
     </div>
 
     <!-- Table -->
-    <flux:table :paginate="$staff">
-        <flux:table.columns>
-            <flux:table.column sortable :sorted="$sortField === 'first_name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('first_name')">Name</flux:table.column>
-            <flux:table.column sortable :sorted="$sortField === 'email'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('email')">Email</flux:table.column>
-            <flux:table.column>Company</flux:table.column>
-            <flux:table.column>Position</flux:table.column>
-            <flux:table.column>Status</flux:table.column>
-            <flux:table.column align="end">Actions</flux:table.column>
-        </flux:table.columns>
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        <flux:table :paginate="$staff">
+            <flux:table.columns>
+                <flux:table.column sortable :sorted="$sortField === 'first_name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('first_name')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Full Identity</flux:table.column>
+                <flux:table.column sortable :sorted="$sortField === 'email'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('email')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Communication</flux:table.column>
+                <flux:table.column class="hidden md:table-cell !bg-zinc-50/50 dark:!bg-zinc-800/20">Assigned To</flux:table.column>
+                <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Status</flux:table.column>
+                <flux:table.column align="end" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Actions</flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @foreach ($staff as $member)
-                <flux:table.row :key="$member->id">
-                    <flux:table.cell class="font-medium">{{ $member->full_name }}</flux:table.cell>
-                    <flux:table.cell>{{ $member->email }}</flux:table.cell>
-                    <flux:table.cell>{{ $member->company->name ?? 'N/A' }}</flux:table.cell>
-                    <flux:table.cell>{{ $member->position ?? 'N/A' }}</flux:table.cell>
-                    <flux:table.cell>
-                        @php
-                            $statusColor = match($member->status) {
-                                'active' => 'success',
-                                'inactive' => 'zinc',
-                                'on_leave' => 'warning',
-                                'terminated' => 'danger',
-                                default => 'zinc',
-                            };
-                        @endphp
-                        @if($member->trashed())
-                            <flux:badge color="danger">Deleted</flux:badge>
-                        @else
-                            <flux:badge :color="$statusColor">
-                                {{ ucfirst(str_replace('_', ' ', $member->status)) }}
-                            </flux:badge>
-                        @endif
-                    </flux:table.cell>
-                    <flux:table.cell align="end">
-                        <flux:button.group>
-                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDetails({{ $member->id }})" />
-                            @if(!$member->trashed())
-                                @can('edit-staff')
-                                    <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $member->id }})" />
-                                @endcan
-                                @can('delete-staff')
-                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $member->id }})" />
-                                @endcan
+            <flux:table.rows>
+                @foreach ($staff as $member)
+                    <flux:table.row :key="$member->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                        <flux:table.cell>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $member->full_name }}</span>
+                                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{{ $member->position ?: 'NO POSITION' }}</span>
+                            </div>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ $member->email }}</span>
+                                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{{ $member->phone ?: 'NO PHONE' }}</span>
+                            </div>
+                        </flux:table.cell>
+                        <flux:table.cell class="hidden md:table-cell">
+                            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{{ $member->company->name ?? 'N/A' }}</span>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @php
+                                $statusColor = match($member->status) {
+                                    'active' => 'success',
+                                    'inactive' => 'zinc',
+                                    'on_leave' => 'warning',
+                                    'terminated' => 'danger',
+                                    default => 'zinc',
+                                };
+                            @endphp
+                            @if($member->trashed())
+                                <flux:badge color="danger" variant="solid" size="sm" class="font-bold uppercase text-[10px]">Archived</flux:badge>
                             @else
-                                @can('restore-staff')
-                                    <flux:button variant="ghost" size="sm" icon="arrow-path" wire:click="restore({{ $member->id }})" />
-                                @endcan
+                                <flux:badge :color="$statusColor" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+                                    {{ str_replace('_', ' ', $member->status) }}
+                                </flux:badge>
                             @endif
-                        </flux:button.group>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforeach
-        </flux:table.rows>
-    </flux:table>
+                        </flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:dropdown>
+                                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" />
+                                <flux:menu>
+                                    <flux:menu.item icon="eye" wire:click="viewDetails({{ $member->id }})">Details</flux:menu.item>
+                                    @if(!$member->trashed())
+                                        @can('edit-staff')
+                                            <flux:menu.item icon="pencil-square" wire:click="edit({{ $member->id }})">Edit</flux:menu.item>
+                                        @endcan
+                                        <flux:menu.separator />
+                                        @can('delete-staff')
+                                            <flux:menu.item variant="danger" icon="trash" wire:click="delete({{ $member->id }})">Delete</flux:menu.item>
+                                        @endcan
+                                    @else
+                                        @can('restore-staff')
+                                            <flux:menu.item icon="arrow-path" wire:click="restore({{ $member->id }})">Restore</flux:menu.item>
+                                        @endcan
+                                    @endif
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
+    </div>
 
     <!-- Details Modal -->
     <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
@@ -126,8 +150,8 @@
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" variant="wide" class="space-y-6">
         <div>
-            <flux:heading size="lg">Add Staff Member</flux:heading>
-            <flux:subheading>Enter the details for the new employee.</flux:subheading>
+            <flux:heading size="lg">Onboard Personnel</flux:heading>
+            <flux:subheading>Enter recruitment profile details.</flux:subheading>
         </div>
 
         <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -177,8 +201,8 @@
     <!-- Edit Modal -->
     <flux:modal wire:model="showEditModal" variant="wide" class="space-y-6">
         <div>
-            <flux:heading size="lg">Edit Staff Member</flux:heading>
-            <flux:subheading>Update the details for this employee.</flux:subheading>
+            <flux:heading size="lg">Edit Personnel</flux:heading>
+            <flux:subheading>Update employment profile information.</flux:subheading>
         </div>
 
         <form wire:submit.prevent="update" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -223,5 +247,21 @@
                 <flux:button type="submit" variant="primary">Update Staff Member</flux:button>
             </div>
         </form>
+    </flux:modal>
+
+    <!-- Delete Confirmation Modal -->
+    <flux:modal wire:model="showDeleteConfirmation" class="max-w-sm space-y-6">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <flux:icon name="trash" class="size-6 text-red-600 dark:text-red-400" />
+            </div>
+            <flux:heading size="lg">Confirm Deletion</flux:heading>
+            <flux:subheading>Are you sure you want to delete this staff member? This action will move them to the archive.</flux:subheading>
+        </div>
+
+        <div class="flex gap-3">
+            <flux:button variant="ghost" class="flex-1" wire:click="showDeleteConfirmation = false">Cancel</flux:button>
+            <flux:button variant="danger" class="flex-1" wire:click="confirmDelete">Delete Personnel</flux:button>
+        </div>
     </flux:modal>
 </div>

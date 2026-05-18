@@ -1,120 +1,125 @@
-<div class="space-y-6">
-    <div class="flex items-center justify-between">
+<div class="space-y-8 p-4 lg:p-0">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-            <flux:heading size="xl" level="1">Devices</flux:heading>
-            <flux:subheading>Manage your IT assets across companies.</flux:subheading>
+            <flux:heading size="xl" level="1" class="font-black tracking-tight">Infrastructure Inventory</flux:heading>
+            <flux:subheading>Global oversight of enterprise IT assets.</flux:subheading>
         </div>
 
-        @can('create-devices')
-            <flux:button icon="plus" variant="primary" wire:click="creating">Add Device</flux:button>
-        @endcan
+        <div class="flex items-center gap-3">
+            <flux:button icon="document-arrow-down" variant="ghost" wire:click="export" flux:tooltip="Export to Excel">Export</flux:button>
+            @can('create-devices')
+                <flux:button icon="document-arrow-up" variant="ghost" wire:click="$set('showImportModal', true)" flux:tooltip="Import from Excel">Import</flux:button>
+                <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Add Asset</flux:button>
+            @endcan
+        </div>
     </div>
 
+    @if (session()->has('message'))
+        <flux:badge color="success" class="w-full justify-center py-3 rounded-xl border-emerald-100 dark:border-emerald-900/30">{{ session('message') }}</flux:badge>
+    @endif
+
+    @if (session()->has('error'))
+        <flux:badge color="danger" class="w-full justify-center py-2">{{ session('error') }}</flux:badge>
+    @endif
+
     <!-- Filters -->
-    <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex-1">
-            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search devices by tag, serial, model..." />
-        </div>
-        <div class="flex flex-wrap gap-4">
-            <flux:select wire:model.live="companyFilter" placeholder="All Companies">
-                <flux:select.option value="">All Companies</flux:select.option>
-                @foreach($companies as $company)
-                    <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
-            <flux:select wire:model.live="statusFilter" placeholder="All Statuses">
-                <flux:select.option value="">All Statuses</flux:select.option>
-                @foreach(['active', 'offline', 'online', 'formatted', 'dead', 'under_repair', 'retired'] as $status)
-                    <flux:select.option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</flux:select.option>
-                @endforeach
-            </flux:select>
-            <flux:select wire:model.live="deviceTypeFilter" placeholder="All Types">
-                <flux:select.option value="">All Types</flux:select.option>
-                @foreach($deviceTypes as $type)
-                    <flux:select.option value="{{ $type }}">{{ ucfirst($type) }}</flux:select.option>
-                @endforeach
-            </flux:select>
-            <flux:checkbox wire:model.live="showTrashed" label="Show deleted devices" />
+    <div class="flex flex-col gap-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search devices by tag, serial, model..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <flux:select wire:model.live="companyFilter" placeholder="All Companies" class="min-w-[160px]">
+                    <flux:select.option value="">All Companies</flux:select.option>
+                    @foreach($companies as $company)
+                        <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:select wire:model.live="statusFilter" placeholder="All Statuses" class="min-w-[140px]">
+                    <flux:select.option value="">All Statuses</flux:select.option>
+                    @foreach(['active', 'offline', 'online', 'formatted', 'dead', 'under_repair', 'retired'] as $status)
+                        <flux:select.option value="{{ $status }}">{{ ucfirst(str_replace('_', ' ', $status)) }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:checkbox wire:model.live="showTrashed" label="Archive" />
+            </div>
         </div>
     </div>
 
     <!-- Table -->
-    <flux:table :paginate="$devices">
-        <flux:table.columns>
-            <flux:table.column sortable :sorted="$sortField === 'asset_tag'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('asset_tag')">Asset Tag</flux:table.column>
-            <flux:table.column sortable :sorted="$sortField === 'model'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('model')">Model</flux:table.column>
-            <flux:table.column>Company</flux:table.column>
-            <flux:table.column>Assigned To</flux:table.column>
-            <flux:table.column>Status</flux:table.column>
-            <flux:table.column>Warranty</flux:table.column>
-            <flux:table.column align="end">Actions</flux:table.column>
-        </flux:table.columns>
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        <flux:table :paginate="$devices">
+            <flux:table.columns>
+                <flux:table.column sortable :sorted="$sortField === 'asset_tag'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('asset_tag')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Identity</flux:table.column>
+                <flux:table.column sortable :sorted="$sortField === 'model'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('model')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Model / Type</flux:table.column>
+                <flux:table.column class="hidden md:table-cell !bg-zinc-50/50 dark:!bg-zinc-800/20">Company</flux:table.column>
+                <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Status</flux:table.column>
+                <flux:table.column align="end" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Actions</flux:table.column>
+            </flux:table.columns>
 
-        <flux:table.rows>
-            @foreach ($devices as $device)
-                <flux:table.row :key="$device->id">
-                    <flux:table.cell class="font-medium">{{ $device->asset_tag }}</flux:table.cell>
-                    <flux:table.cell>
-                        <div class="flex flex-col">
-                            <span>{{ $device->model }}</span>
-                            <span class="text-xs text-zinc-500">{{ $device->serial_number }}</span>
-                        </div>
-                    </flux:table.cell>
-                    <flux:table.cell>{{ $device->company->name ?? 'N/A' }}</flux:table.cell>
-                    <flux:table.cell>{{ $device->staff->full_name ?? 'Unassigned' }}</flux:table.cell>
-                    <flux:table.cell>
-                        @php
-                            $statusColor = match($device->status) {
-                                'active', 'online' => 'success',
-                                'offline', 'formatted' => 'zinc',
-                                'dead' => 'danger',
-                                'under_repair' => 'warning',
-                                'retired' => 'zinc',
-                                default => 'zinc',
-                            };
-                        @endphp
-                        @if($device->trashed())
-                            <flux:badge color="danger">Deleted</flux:badge>
-                        @else
-                            <flux:badge :color="$statusColor">
-                                {{ ucfirst(str_replace('_', ' ', $device->status)) }}
-                            </flux:badge>
-                        @endif
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        @if($device->warranty_expiry)
-                            @if($device->warranty_expiry->isPast())
-                                <flux:badge color="danger" size="sm">Expired</flux:badge>
-                            @elseif($device->warranty_expiry->diffInDays(now()) < 30)
-                                <flux:badge color="warning" size="sm">Expiring Soon</flux:badge>
+            <flux:table.rows>
+                @foreach ($devices as $device)
+                    <flux:table.row :key="$device->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                        <flux:table.cell>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $device->asset_tag }}</span>
+                                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{{ $device->serial_number ?: 'NO SERIAL' }}</span>
+                            </div>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ $device->model }}</span>
+                                <span class="text-xs text-zinc-500">{{ $device->device_type }}</span>
+                            </div>
+                        </flux:table.cell>
+                        <flux:table.cell class="hidden md:table-cell">
+                            <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{{ $device->company->name ?? 'N/A' }}</span>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @php
+                                $statusColor = match($device->status) {
+                                    'active', 'online' => 'success',
+                                    'offline', 'formatted' => 'zinc',
+                                    'dead' => 'danger',
+                                    'under_repair' => 'warning',
+                                    'retired' => 'zinc',
+                                    default => 'zinc',
+                                };
+                            @endphp
+                            @if($device->trashed())
+                                <flux:badge color="danger" variant="solid" size="sm" class="font-bold uppercase text-[10px]">Archived</flux:badge>
                             @else
-                                <flux:text size="sm">{{ $device->warranty_expiry->format('Y-m-d') }}</flux:text>
+                                <flux:badge :color="$statusColor" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+                                    {{ str_replace('_', ' ', $device->status) }}
+                                </flux:badge>
                             @endif
-                        @else
-                            <flux:text size="sm" color="zinc">N/A</flux:text>
-                        @endif
-                    </flux:table.cell>
-                    <flux:table.cell align="end">
-                        <flux:button.group>
-                            <flux:button variant="ghost" size="sm" icon="eye" wire:click="viewDetails({{ $device->id }})" />
-                            @if(!$device->trashed())
-                                @can('edit-devices')
-                                    <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $device->id }})" />
-                                @endcan
-                                @can('delete-devices')
-                                    <flux:button variant="ghost" size="sm" icon="trash" wire:click="delete({{ $device->id }})" />
-                                @endcan
-                            @else
-                                @can('restore-devices')
-                                    <flux:button variant="ghost" size="sm" icon="arrow-path" wire:click="restore({{ $device->id }})" />
-                                @endcan
-                            @endif
-                        </flux:button.group>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforeach
-        </flux:table.rows>
-    </flux:table>
+                        </flux:table.cell>
+                        <flux:table.cell align="end">
+                            <flux:dropdown>
+                                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" />
+                                <flux:menu>
+                                    <flux:menu.item icon="eye" wire:click="viewDetails({{ $device->id }})">Details</flux:menu.item>
+                                    @if(!$device->trashed())
+                                        @can('edit-devices')
+                                            <flux:menu.item icon="pencil-square" wire:click="edit({{ $device->id }})">Edit</flux:menu.item>
+                                        @endcan
+                                        <flux:menu.separator />
+                                        @can('delete-devices')
+                                            <flux:menu.item variant="danger" icon="trash" wire:click="delete({{ $device->id }})">Delete</flux:menu.item>
+                                        @endcan
+                                    @else
+                                        @can('restore-devices')
+                                            <flux:menu.item icon="arrow-path" wire:click="restore({{ $device->id }})">Restore</flux:menu.item>
+                                        @endcan
+                                    @endif
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
+    </div>
 
     <!-- Details Modal -->
     <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
@@ -298,5 +303,53 @@
                 <flux:button type="submit" variant="primary">Update Device</flux:button>
             </div>
         </form>
+    </flux:modal>
+
+    <!-- Import Modal -->
+    <flux:modal wire:model="showImportModal" class="space-y-6">
+        <div>
+            <flux:heading size="lg">Import Devices</flux:heading>
+            <flux:subheading>Upload an Excel file (.xlsx, .xls or .csv) to import devices.</flux:subheading>
+        </div>
+
+        <form wire:submit.prevent="import" class="space-y-6">
+            <flux:input type="file" wire:model="importFile" label="Excel/CSV File" required />
+            
+            @if($importErrors)
+                <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 space-y-1">
+                    <p class="font-bold">Import failed with following errors:</p>
+                    <ul class="list-disc list-inside overflow-auto max-h-40">
+                        @foreach($importErrors as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="ghost" wire:click="showImportModal = false">Cancel</flux:button>
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="import">Import</span>
+                    <span wire:loading wire:target="import">Importing...</span>
+                </flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <!-- Delete Confirmation Modal -->
+    <flux:modal wire:model="showDeleteConfirmation" class="max-w-sm space-y-6">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                <flux:icon name="trash" class="size-6 text-red-600 dark:text-red-400" />
+            </div>
+            <flux:heading size="lg">Confirm Deletion</flux:heading>
+            <flux:subheading>Are you sure you want to delete this asset? This action will move it to the archive.</flux:subheading>
+        </div>
+
+        <div class="flex gap-3">
+            <flux:button variant="ghost" class="flex-1" wire:click="showDeleteConfirmation = false">Cancel</flux:button>
+            <flux:button variant="danger" class="flex-1" wire:click="confirmDelete">Delete Asset</flux:button>
+        </div>
     </flux:modal>
 </div>

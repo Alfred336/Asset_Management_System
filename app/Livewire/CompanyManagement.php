@@ -46,6 +46,11 @@ class CompanyManagement extends Component
 
     public $status;
 
+    // Delete confirmation
+    public $showDeleteConfirmation = false;
+
+    public $idToDelete = null;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255|unique:companies,email',
@@ -181,9 +186,10 @@ class CompanyManagement extends Component
 
     public function update()
     {
-        $this->validate([
-            'email' => 'required|email|max:255|unique:companies,email,'.$this->companyId,
-        ]);
+        $rules = $this->rules;
+        $rules['email'] = 'required|email|max:255|unique:companies,email,'.$this->companyId;
+
+        $this->validate($rules);
 
         // Check if the user has permission to edit companies
         if (Gate::denies('edit-companies')) {
@@ -217,8 +223,21 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::findOrFail($id);
+        $this->idToDelete = $id;
+        $this->showDeleteConfirmation = true;
+    }
+
+    public function confirmDelete()
+    {
+        if (! $this->idToDelete) {
+            return;
+        }
+
+        $company = Company::findOrFail($this->idToDelete);
         $company->delete();
+
+        $this->showDeleteConfirmation = false;
+        $this->idToDelete = null;
 
         session()->flash('message', 'Company deleted successfully.');
     }

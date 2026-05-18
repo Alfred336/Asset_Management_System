@@ -1,16 +1,3 @@
-<?php
-
-use Livewire\Component;
-
-new class extends Component
-{
-    public function markAllAsRead()
-    {
-        auth()->user()->unreadNotifications->markAsRead();
-    }
-};
-?>
-
 <flux:dropdown>
     <flux:button icon="bell" variant="ghost" size="sm">
         @if(auth()->user()->unreadNotifications->count() > 0)

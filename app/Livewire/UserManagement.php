@@ -43,6 +43,11 @@ class UserManagement extends Component
 
     public $selectedRole = '';
 
+    // Delete confirmation
+    public $showDeleteConfirmation = false;
+
+    public $idToDelete = null;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'email' => 'required|email|max:255|unique:users,email',
@@ -148,8 +153,10 @@ class UserManagement extends Component
     public function update()
     {
         $this->validate([
+            'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$this->userId,
             'selectedRole' => 'nullable|exists:roles,name',
+            'status' => 'required|in:active,inactive',
         ]);
 
         if (Gate::denies('edit-user')) {
@@ -176,7 +183,7 @@ class UserManagement extends Component
         session()->flash('message', 'User updated successfully.');
     }
 
-    public function forceDelete($id)
+    public function delete($id)
     {
         // Check if the user has permission to delete users
         if (Gate::denies('delete-user')) {
@@ -185,8 +192,21 @@ class UserManagement extends Component
             return;
         }
 
-        $user = User::withTrashed()->findOrFail($id);
+        $this->idToDelete = $id;
+        $this->showDeleteConfirmation = true;
+    }
+
+    public function confirmDelete()
+    {
+        if (! $this->idToDelete) {
+            return;
+        }
+
+        $user = User::withTrashed()->findOrFail($this->idToDelete);
         $user->forceDelete();
+
+        $this->showDeleteConfirmation = false;
+        $this->idToDelete = null;
 
         session()->flash('message', 'User permanently deleted.');
     }

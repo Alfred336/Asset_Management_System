@@ -68,10 +68,10 @@
                     </flux:table.cell>
                     <flux:table.cell align="end">
                         <flux:button.group>
-                            @can('update-device-status')
+                            @can('edit-devices')
                                 <flux:button variant="ghost" size="sm" icon="pencil-square" wire:click="openStatusUpdate({{ $device->id }})" />
                             @endcan
-                            @can('view-device-status-history')
+                            @can('edit-devices')
                                 <flux:button variant="ghost" size="sm" icon="clock" wire:click="viewHistory({{ $device->id }})" />
                             @endcan
                         </flux:button.group>

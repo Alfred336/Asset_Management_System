@@ -79,7 +79,9 @@ class DeviceStatusManager extends Component
         $device = Device::findOrFail($this->deviceId);
         $oldStatus = $device->status;
 
-        $device->update(['status' => $this->status]);
+        $device->status = $this->status;
+        $device->touch(); // Force update updated_at even if status didn't change
+        $device->save();
 
         DeviceStatusHistory::create([
             'device_id' => $device->id,
