@@ -129,7 +129,7 @@ class DeviceManagement extends Component
         'processor' => 'nullable|string|max:100',
         'ram_gb' => 'nullable|integer|min:1',
         'storage_gb' => 'nullable|integer|min:1',
-        'storage_type' => 'nullable|string|max:50',
+        'storage_type' => 'nullable|in:HDD,SSD,NVMe,eMMC,Hybrid',
         'ip_address' => 'nullable|ip',
         'mac_address' => 'nullable|regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
         'hostname' => 'nullable|string|max:100',
@@ -152,20 +152,65 @@ class DeviceManagement extends Component
     public function mount()
     {
         $this->status = 'active';
+        $this->loadCompaniesAndStaff();
+    }
+
+    public function loadCompaniesAndStaff()
+    {
+        $this->companies = Company::where('status', 'active')->orderBy('name')->get();
+        $this->staff = collect(); // Empty collection, will be populated when company is selected
+    }
+
+    public function loadStaffForCompany($companyId = null)
+    {
+        $companyId = $companyId ?: $this->company_id;
+
+        if ($companyId) {
+            $this->staff = Staff::where('company_id', $companyId)
+                ->where('status', 'active')
+                ->orderBy('first_name')
+                ->orderBy('last_name')
+                ->get();
+        } else {
+            $this->staff = collect();
+        }
+
+        // Reset staff selection when company changes
+        $this->staff_id = '';
     }
 
     public function render()
     {
-        $companies = Company::where('status', 'active')->get();
-        $staff = Staff::where('status', 'active')->get();
+        $companies = Company::where('status', 'active')->orderBy('name')->get();
+
+        // Load staff based on selected company or all active staff if no company selected
+        if ($this->companyFilter) {
+            $staff = Staff::where('company_id', $this->companyFilter)
+                ->where('status', 'active')
+                ->orderBy('first_name')
+                ->orderBy('last_name')
+                ->get();
+        } elseif ($this->company_id) {
+            // For create/edit forms, load staff of selected company
+            $staff = Staff::where('company_id', $this->company_id)
+                ->where('status', 'active')
+                ->orderBy('first_name')
+                ->orderBy('last_name')
+                ->get();
+        } else {
+            $staff = Staff::where('status', 'active')->orderBy('first_name')->orderBy('last_name')->get();
+        }
 
         $deviceQuery = Device::with(['company', 'staff'])
             ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
-                $query->where('asset_tag', 'like', '%'.$this->search.'%')
-                    ->orWhere('serial_number', 'like', '%'.$this->search.'%')
-                    ->orWhere('model', 'like', '%'.$this->search.'%')
-                    ->orWhere('hostname', 'like', '%'.$this->search.'%');
+                $search = trim($this->search);
+                if ($search !== '') {
+                    $query->where('asset_tag', 'like', '%'.$search.'%')
+                        ->orWhere('serial_number', 'like', '%'.$search.'%')
+                        ->orWhere('model', 'like', '%'.$search.'%')
+                        ->orWhere('hostname', 'like', '%'.$search.'%');
+                }
             })
             ->when($this->companyFilter, function ($query) {
                 $query->where('company_id', $this->companyFilter);
@@ -228,7 +273,7 @@ class DeviceManagement extends Component
 
         Device::create([
             'company_id' => $this->company_id,
-            'staff_id' => $this->staff_id,
+            'staff_id' => $this->staff_id ?: null,
             'asset_tag' => $this->asset_tag,
             'serial_number' => $this->serial_number,
             'model' => $this->model,
@@ -245,9 +290,9 @@ class DeviceManagement extends Component
             'hostname' => $this->hostname,
             'location' => $this->location,
             'status' => $this->status,
-            'purchase_date' => $this->purchase_date,
-            'purchase_cost' => $this->purchase_cost,
-            'warranty_expiry' => $this->warranty_expiry,
+            'purchase_date' => $this->purchase_date ?: null,
+            'purchase_cost' => $this->purchase_cost ?: null,
+            'warranty_expiry' => $this->warranty_expiry ?: null,
             'notes' => $this->notes,
         ]);
 

@@ -2,14 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Livewire\DashboardCharts;
+use App\Livewire\DashboardStats;
+use App\Models\Company;
 use App\Models\Device;
 use App\Models\Staff;
-use App\Models\Company;
-use Spatie\Permission\Models\Role;
-use Livewire\Livewire;
-use Tests\TestCase;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class PremiumDashboardTest extends TestCase
 {
@@ -27,27 +29,28 @@ class PremiumDashboardTest extends TestCase
         $user->assignRole('Super Admin');
 
         $company = Company::factory()->create();
-        
-        Staff::factory()->count(5)->create(['company_id' => $company->id]);
-        
-        // Create 10 regular devices - override staff_id to avoid creating extra staff
+
+        // Create 5 staff members for the company
+        $staffMembers = Staff::factory()->count(5)->create(['company_id' => $company->id]);
+
+        // Create 10 regular devices - assign to existing staff members to avoid creating extra staff
         Device::factory()->count(10)->create([
             'company_id' => $company->id,
-            'staff_id' => Staff::factory()->create(['company_id' => $company->id])->id,
+            'staff_id' => $staffMembers->random(),
         ]);
-        
-        // Create 3 devices expiring soon
+
+        // Create 3 devices expiring soon - assign to existing staff members
         Device::factory()->count(3)->create([
             'company_id' => $company->id,
-            'staff_id' => Staff::factory()->create(['company_id' => $company->id])->id,
-            'warranty_expiry' => now()->addDays(10)
+            'staff_id' => $staffMembers->random(),
+            'warranty_expiry' => now()->addDays(10),
         ]);
 
         $this->actingAs($user);
 
-        Livewire::test(\App\Livewire\DashboardStats::class)
+        Livewire::test(DashboardStats::class)
             ->assertSet('deviceCount', 13)
-            ->assertSet('staffCount', 5) // 5 + 1 + 1 = 7, but factory also creates companies
+            ->assertSet('staffCount', 5) // 5 staff members total
             ->assertSet('expiringSoon', 3);
     }
 
@@ -63,7 +66,7 @@ class PremiumDashboardTest extends TestCase
 
         $this->actingAs($user);
 
-        Livewire::test(\App\Livewire\DashboardCharts::class)
+        Livewire::test(DashboardCharts::class)
             ->assertSet('statusData.labels', ['Active', 'Offline'])
             ->assertSet('statusData.values', [1, 1])
             ->assertSet('typeData.labels', ['Desktop', 'Laptop'])

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Company;
 use App\Models\Device;
 use App\Models\DeviceStatusHistory;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -87,7 +88,8 @@ class DeviceStatusManager extends Component
             'device_id' => $device->id,
             'status' => $this->status,
             'notes' => $this->notes,
-            'changed_by' => auth()->id(),
+            // Use null-safe user id to avoid undefined method issues in some environments
+            'changed_by' => auth()->user()?->id ?? null,
         ]);
 
         $this->showUpdateModal = false;

@@ -5,7 +5,7 @@
             <flux:subheading>Manage access, roles, and user profiles.</flux:subheading>
         </div>
         @can('create-user')
-            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Provision User</flux:button>
+            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700">Provision User</flux:button>
         @endcan
     </div>
 
@@ -19,12 +19,12 @@
 
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search system users..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
+            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search system users..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-pink-500" />
         </div>
         <flux:checkbox wire:model.live="showTrashed" label="Archive" />
     </div>
 
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden premium-card">
         <flux:table :paginate="$users">
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('name')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Identity</flux:table.column>
@@ -36,12 +36,12 @@
 
             <flux:table.rows>
                 @foreach ($users as $user)
-                    <flux:table.row :key="$user->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
-                        <flux:table.cell class="font-bold text-zinc-900 dark:text-zinc-100">{{ $user->name }}</flux:table.cell>
+                    <flux:table.row :key="$user->id" class="group hover:bg-pink-50/30 dark:hover:bg-pink-900/10 transition-colors">
+                        <flux:table.cell class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{{ $user->name }}</flux:table.cell>
                         <flux:table.cell class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ $user->email }}</flux:table.cell>
                         <flux:table.cell>
                             @if($user->roles->isNotEmpty())
-                                <flux:badge color="indigo" variant="outline" size="sm" class="font-bold uppercase text-[10px]">{{ $user->roles->first()->name }}</flux:badge>
+                                <flux:badge color="pink" variant="outline" size="sm" class="font-bold uppercase text-[10px]">{{ $user->roles->first()->name }}</flux:badge>
                             @else
                                 <span class="text-[10px] uppercase tracking-wider text-zinc-400">—</span>
                             @endif

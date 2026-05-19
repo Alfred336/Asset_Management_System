@@ -6,7 +6,7 @@
         </div>
 
         @can('create-staff')
-            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Onboard Personnel</flux:button>
+            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700">Onboard Personnel</flux:button>
         @endcan
     </div>
 
@@ -21,7 +21,7 @@
     <!-- Filters -->
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search personnel..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
+            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search personnel..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-pink-500" />
         </div>
         <div class="flex items-center gap-4">
             <flux:select wire:model.live="companyFilter" placeholder="All Companies" class="min-w-[160px]">
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Table -->
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden premium-card">
         <flux:table :paginate="$staff">
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'first_name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('first_name')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Full Identity</flux:table.column>
@@ -47,10 +47,10 @@
 
             <flux:table.rows>
                 @foreach ($staff as $member)
-                    <flux:table.row :key="$member->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                    <flux:table.row :key="$member->id" class="group hover:bg-pink-50/30 dark:hover:bg-pink-900/10 transition-colors">
                         <flux:table.cell>
                             <div class="flex flex-col">
-                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $member->full_name }}</span>
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{{ $member->full_name }}</span>
                                 <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{{ $member->position ?: 'NO POSITION' }}</span>
                             </div>
                         </flux:table.cell>

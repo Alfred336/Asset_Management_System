@@ -2,13 +2,14 @@
 
 namespace App\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class NotificationBell extends Component
 {
     public function markAllAsRead(): void
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        Auth::user()->unreadNotifications->markAsRead();
 
         $this->dispatch('notifications-read');
     }

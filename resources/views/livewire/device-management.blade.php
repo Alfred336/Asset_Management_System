@@ -9,7 +9,7 @@
             <flux:button icon="document-arrow-down" variant="ghost" wire:click="export" flux:tooltip="Export to Excel">Export</flux:button>
             @can('create-devices')
                 <flux:button icon="document-arrow-up" variant="ghost" wire:click="$set('showImportModal', true)" flux:tooltip="Import from Excel">Import</flux:button>
-                <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Add Asset</flux:button>
+                <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700">Add Asset</flux:button>
             @endcan
         </div>
     </div>
@@ -26,7 +26,7 @@
     <div class="flex flex-col gap-6">
         <div class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
-                <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search devices by tag, serial, model..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
+                <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search devices by tag, serial, model..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-pink-500" />
             </div>
             <div class="flex flex-wrap items-center gap-4">
                 <flux:select wire:model.live="companyFilter" placeholder="All Companies" class="min-w-[160px]">
@@ -47,22 +47,23 @@
     </div>
 
     <!-- Table -->
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden premium-card">
         <flux:table :paginate="$devices">
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'asset_tag'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('asset_tag')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Identity</flux:table.column>
                 <flux:table.column sortable :sorted="$sortField === 'model'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('model')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Model / Type</flux:table.column>
                 <flux:table.column class="hidden md:table-cell !bg-zinc-50/50 dark:!bg-zinc-800/20">Company</flux:table.column>
+                <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Assigned Staff</flux:table.column>
                 <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Status</flux:table.column>
                 <flux:table.column align="end" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Actions</flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
                 @foreach ($devices as $device)
-                    <flux:table.row :key="$device->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                    <flux:table.row :key="$device->id" class="group hover:bg-pink-50/30 dark:hover:bg-pink-900/10 transition-colors">
                         <flux:table.cell>
                             <div class="flex flex-col">
-                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $device->asset_tag }}</span>
+                                <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{{ $device->asset_tag }}</span>
                                 <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{{ $device->serial_number ?: 'NO SERIAL' }}</span>
                             </div>
                         </flux:table.cell>
@@ -74,6 +75,9 @@
                         </flux:table.cell>
                         <flux:table.cell class="hidden md:table-cell">
                             <span class="text-xs font-semibold text-zinc-600 dark:text-zinc-400">{{ $device->company->name ?? 'N/A' }}</span>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <span class="text-xs font-medium text-zinc-600 dark:text-zinc-400">{{ $device->staff?->full_name ?? 'Unassigned' }}</span>
                         </flux:table.cell>
                         <flux:table.cell>
                             @php
@@ -176,18 +180,20 @@
             <flux:subheading>Enter the details for the new IT asset.</flux:subheading>
         </div>
 
-        <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <flux:select wire:model="company_id" label="Company" required placeholder="Select a company">
-                @foreach($companies as $company)
-                    <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
+          <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <flux:select wire:model="company_id" label="Company" required placeholder="Select a company" wire:change="loadStaffForCompany">
+                  <flux:select.option value="">Select a company</flux:select.option>
+                  @foreach($companies as $company)
+                      <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
+                  @endforeach
+              </flux:select>
 
-            <flux:select wire:model="staff_id" label="Assigned Staff (Optional)" placeholder="Unassigned">
-                @foreach($staff as $staffMember)
-                    <flux:select.option value="{{ $staffMember->id }}">{{ $staffMember->full_name }}</flux:select.option>
-                @endforeach
-            </flux:select>
+             <flux:select wire:model="staff_id" label="Assigned Staff (Optional)" placeholder="Unassigned">
+                 <flux:select.option value="">Unassigned</flux:select.option>
+                 @foreach($staff as $staffMember)
+                     <flux:select.option value="{{ $staffMember->id }}">{{ $staffMember->full_name }}</flux:select.option>
+                 @endforeach
+             </flux:select>
 
             <flux:input wire:model="asset_tag" label="Asset Tag" required />
             <flux:input wire:model="serial_number" label="Serial Number" />
@@ -204,12 +210,24 @@
             <div class="grid grid-cols-2 gap-4">
                 <flux:input type="number" wire:model="ram_gb" label="RAM (GB)" min="1" />
                 <flux:input type="number" wire:model="storage_gb" label="Storage (GB)" min="1" />
+                <flux:radio.group wire:model="storage_type" label="Storage type">
+                    <flux:radio value="HDD" label="HDD" checked />
+                    <flux:radio value="SSD" label="SSD" />
+                    <flux:radio value="NVMe" label="NVMe" />
+                    <flux:radio value="eMMC" label="eMMC" />
+                    <flux:radio value="Hybrid" label="Hybrid" />
+                </flux:radio.group>
             </div>
 
-            <flux:input wire:model="ip_address" label="IP Address" />
-            <flux:input wire:model="mac_address" label="MAC Address" placeholder="00:00:00:00:00:00" />
-            <flux:input wire:model="hostname" label="Hostname" />
-            <flux:input wire:model="location" label="Location" />
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input wire:model="ip_address" label="IP Address" />
+                <flux:input wire:model="mac_address" label="MAC Address" placeholder="00:00:00:00:00:00" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <flux:input wire:model="hostname" label="Hostname" />
+                <flux:input wire:model="location" label="Location" />
+            </div>
 
             <flux:select wire:model="status" label="Status" required>
                 <flux:select.option value="active">Active</flux:select.option>
@@ -244,18 +262,20 @@
             <flux:subheading>Update the details for this IT asset.</flux:subheading>
         </div>
 
-        <form wire:submit.prevent="update" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <flux:select wire:model="company_id" label="Company" required placeholder="Select a company">
-                @foreach($companies as $company)
-                    <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
+          <form wire:submit.prevent="update" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <flux:select wire:model="company_id" label="Company" required placeholder="Select a company" wire:change="loadStaffForCompany">
+                  <flux:select.option value="">Select a company</flux:select.option>
+                  @foreach($companies as $company)
+                      <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
+                  @endforeach
+              </flux:select>
 
-            <flux:select wire:model="staff_id" label="Assigned Staff (Optional)" placeholder="Unassigned">
-                @foreach($staff as $staffMember)
-                    <flux:select.option value="{{ $staffMember->id }}">{{ $staffMember->full_name }}</flux:select.option>
-                @endforeach
-            </flux:select>
+             <flux:select wire:model="staff_id" label="Assigned Staff (Optional)" placeholder="Unassigned">
+                 <flux:select.option value="">Unassigned</flux:select.option>
+                 @foreach($staff as $staffMember)
+                     <flux:select.option value="{{ $staffMember->id }}">{{ $staffMember->full_name }}</flux:select.option>
+                 @endforeach
+             </flux:select>
 
             <flux:input wire:model="asset_tag" label="Asset Tag" required />
             <flux:input wire:model="serial_number" label="Serial Number" />

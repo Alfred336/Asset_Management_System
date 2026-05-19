@@ -24,6 +24,12 @@
                 @endif
             </div>
 
+            <flux:select wire:model="timezone" :label="__('Timezone')" searchable>
+                @foreach($this->timezones as $tz)
+                    <flux:select.option :value="$tz">{{ $tz }}</flux:select.option>
+                @endforeach
+            </flux:select>
+
             <div class="flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
             </div>

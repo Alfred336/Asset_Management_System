@@ -19,6 +19,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public string $timezone = 'UTC';
+
     /**
      * Mount the component.
      */
@@ -26,6 +28,7 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->timezone = Auth::user()->timezone ?? 'UTC';
     }
 
     /**
@@ -64,6 +67,12 @@ class Profile extends Component
         $user->sendEmailVerificationNotification();
 
         Flux::toast(text: __('A new verification link has been sent to your email address.'));
+    }
+
+    #[Computed]
+    public function timezones(): array
+    {
+        return \DateTimeZone::listIdentifiers();
     }
 
     #[Computed]
