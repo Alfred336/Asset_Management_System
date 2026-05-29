@@ -90,7 +90,7 @@
                             </a>
                             
                             <div class="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800">
-                                <flux:button variant="primary" class="w-full shadow-lg shadow-brand-500/20" icon="plus">Generate Global Report</flux:button>
+                                <flux:button href="{{ route('reports.weekly-download') }}" variant="primary" class="w-full shadow-lg shadow-brand-500/20" icon="arrow-down-tray">Download Global Report</flux:button>
                             </div>
                         </div>
                     </div>

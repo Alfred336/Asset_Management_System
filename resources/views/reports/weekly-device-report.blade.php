@@ -10,21 +10,25 @@
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 10pt;
-            color: #334155;
+            color: #1e293b; /* slate-800 */
             line-height: 1.6;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
         }
-        .header-container {
-            background-color: #db2777; /* pink-600 */
-            color: #ffffff;
-            padding: 40px 1.5cm;
-            margin-bottom: 30px;
+        
+        /* Premium Header Accent */
+        .top-accent {
+            height: 6px;
+            background: linear-gradient(90deg, #1e293b 0%, #4f46e5 100%);
+            width: 100%;
         }
-        .header-content {
+        
+        .header-section {
             display: table;
             width: 100%;
+            padding: 40px 1.5cm 30px 1.5cm;
+            border-bottom: 1px solid #e2e8f0;
         }
         .header-left {
             display: table-cell;
@@ -35,206 +39,243 @@
             vertical-align: middle;
             text-align: right;
         }
-        .logo {
-            max-height: 70px;
-            margin-bottom: 0;
-            background-color: white;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        h1 {
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 22pt;
+        
+        .report-title {
+            font-size: 20pt;
             font-weight: 800;
-            color: #ffffff;
+            color: #0f172a;
+            margin: 0;
+            letter-spacing: -0.5px;
         }
-        .meta {
+        .report-subtitle {
             font-size: 9pt;
-            color: #fce7f3; /* pink-100 */
-            margin-top: 5px;
-            font-weight: 300;
-        }
-        .content-body {
-            padding: 0 1.5cm 2cm 1.5cm;
-        }
-        .section-title {
-            color: #9d174d; /* pink-800 */
-            font-size: 14pt;
-            font-weight: bold;
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #fbcfe8; /* pink-200 */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 40px;
-        }
-        th {
-            background-color: #fdf2f8; /* pink-50 */
-            color: #9d174d; /* pink-800 */
-            text-align: left;
-            padding: 15px 12px;
-            font-size: 8pt;
+            color: #6366f1; /* indigo-500 */
+            margin-top: 4px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            border-bottom: 2px solid #db2777;
         }
-        td {
-            padding: 12px 12px;
-            border-bottom: 1px solid #fce7f3;
-            font-size: 10pt;
+        .logo {
+            max-height: 45px;
         }
-        .text-right { text-align: right; }
-        .font-bold { font-weight: bold; }
         
-        .summary-wrapper {
+        .doc-info {
+            margin-top: 12px;
+            font-size: 7.5pt;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .content-body {
+            padding: 1cm 1.5cm 2cm 1.5cm;
+        }
+        
+        h2 {
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+        
+        .section-num {
+            color: #6366f1;
+            margin-right: 8px;
+        }
+        
+        .metadata-grid {
             display: table;
             width: 100%;
-            margin-top: 20px;
-            page-break-inside: avoid;
+            margin-bottom: 25px;
         }
-        .summary-box {
-            background-color: #9d174d;
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
+        .metadata-item {
+            display: table-cell;
+            width: 33.33%;
         }
-        .summary-title {
-            font-size: 16pt;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
+        .metadata-label {
+            font-size: 7pt;
+            font-weight: 700;
+            color: #94a3b8;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
         }
-        .summary-stats {
+        .metadata-value {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .data-table {
             width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 35px;
         }
-        .summary-item-label {
-            font-size: 10pt;
-            opacity: 0.9;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        .data-table th {
+            background-color: #f8fafc;
+            color: #475569;
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #e2e8f0;
         }
-        .summary-item-value {
-            font-size: 14pt;
-            font-weight: bold;
-            text-align: right;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 9.5pt;
+            color: #334155;
         }
-        .grand-total-row td {
-            background-color: #fdf2f8;
-            color: #9d174d;
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table tr.total-row td {
+            background-color: #f8fafc;
             font-weight: 800;
-            font-size: 11pt;
-            border-top: 2px solid #db2777;
+            color: #0f172a;
+            border-top: 2px solid #e2e8f0;
+            border-bottom: 2px solid #e2e8f0;
         }
+        
+        .summary-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            width: 60%;
+            margin-bottom: 10px;
+        }
+        
+        .text-right { text-align: right; }
+        .indigo { color: #4f46e5; }
+        
         .footer {
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            font-size: 8pt;
+            width: 100%;
+            font-size: 7.5pt;
             color: #94a3b8;
+            padding: 20px 1.5cm;
             text-align: center;
-            background-color: #f8fafc;
-            line-height: 50px;
+            background-color: #ffffff;
+            border-top: 1px solid #f1f5f9;
         }
     </style>
 </head>
 <body>
-    <div class="header-container">
-        <div class="header-content">
-            <div class="header-left">
-                <h1>Weekly Device Status Report</h1>
-                <div class="meta">
-                    Reporting Period: <strong>{{ $periodStart }} &mdash; {{ $periodEnd }}</strong><br>
-                    Generated on: {{ $generatedDate }}
-                </div>
+    <div class="top-accent"></div>
+    <div class="header-section">
+        <div class="header-left">
+            <h1 class="report-title">Infrastructure Status</h1>
+            <div class="report-subtitle">Standard Operating Procedure &bull; IT Asset Management</div>
+            <div class="doc-info">
+                Protocol: SOP-IT-001 &bull; 
+                Ref: WSR-{{ date('Ymd') }} &bull; 
+                Classification: Confidential
             </div>
-            <div class="header-right">
-                @php
-                    $logoPath = public_path('wemanage-logo.png');
-                @endphp
-                @if(file_exists($logoPath))
-                    <img src="{{ $logoPath }}" class="logo">
-                @else
-                    <div style="font-size: 24pt; font-weight: 900; opacity: 0.5;">WEMANAGE</div>
-                @endif
-            </div>
+        </div>
+        <div class="header-right">
+            @php
+                $logoPath = public_path('wemanage_logo.png');
+                $logoBase64 = '';
+                if (file_exists($logoPath)) {
+                    $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                    $data = file_get_contents($logoPath);
+                    $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                }
+            @endphp
+            @if($logoBase64)
+                <img src="{{ $logoBase64 }}" class="logo">
+            @else
+                <div style="font-size: 14pt; font-weight: 900; color: #0f172a; letter-spacing: -1px;">WE<span class="indigo">MANAGE</span></div>
+            @endif
         </div>
     </div>
 
     <div class="content-body">
-        <div class="section-title">Company Statistics Summary</div>
-        <table>
+        <h2><span class="section-num">1.0</span> Document Control</h2>
+        <div class="metadata-grid">
+            <div class="metadata-item">
+                <div class="metadata-label">Department</div>
+                <div class="metadata-value">Information Technology</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Reporting Period</div>
+                <div class="metadata-value">{{ $periodStart }} &mdash; {{ $periodEnd }}</div>
+            </div>
+            <div class="metadata-item">
+                <div class="metadata-label">Status</div>
+                <div class="metadata-value">System Validated</div>
+            </div>
+        </div>
+
+        <h2><span class="section-num">2.0</span> Key Performance Metrics</h2>
+        <div class="summary-box">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 5px 0;">Total Management Portfolios</td>
+                    <td class="text-right" style="font-weight: 800; font-size: 11pt;">{{ $companyStats->count() }}</td>
+                </tr>
+                <tr>
+                    <td style="font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 5px 0;">Total Physical Assets</td>
+                    <td class="text-right" style="font-weight: 800; font-size: 11pt;">{{ $grandTotal }}</td>
+                </tr>
+                <tr>
+                    <td style="font-size: 8pt; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 5px 0;">Global Availability Index</td>
+                    <td class="text-right" style="font-weight: 800; font-size: 11pt; color: #4f46e5;">
+                        @php
+                            $globalHealth = $grandTotal > 0 ? ($totalActive / $grandTotal) * 100 : 0;
+                        @endphp
+                        {{ number_format($globalHealth, 1) }}%
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h2><span class="section-num">3.0</span> Asset Distribution by Entity</h2>
+        <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 35%">Company Name</th>
+                    <th style="width: 40%;">Entity / Company</th>
                     <th class="text-right">Total</th>
                     <th class="text-right">Active</th>
                     <th class="text-right">Offline</th>
-                    <th class="text-right">Dead</th>
                     <th class="text-right">Retired</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($companyStats as $stat)
                     <tr>
-                        <td class="font-bold" style="color: #9d174d;">{{ $stat->company_name }}</td>
+                        <td style="font-weight: 600; color: #0f172a;">{{ $stat->company_name }}</td>
                         <td class="text-right font-bold">{{ $stat->total }}</td>
                         <td class="text-right">{{ $stat->active_count }}</td>
-                        <td class="text-right">{{ $stat->offline_count }}</td>
-                        <td class="text-right">{{ $stat->dead_count }}</td>
-                        <td class="text-right">{{ $stat->retired_count }}</td>
+                        <td class="text-right" style="color: {{ $stat->offline_count > 0 ? '#ef4444' : 'inherit' }}">{{ $stat->offline_count }}</td>
+                        <td class="text-right" style="color: #94a3b8;">{{ $stat->retired_count }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                <tr class="grand-total-row">
-                    <td>GRAND TOTAL</td>
+                <tr class="total-row">
+                    <td>AGGREGATE TOTAL</td>
                     <td class="text-right">{{ $grandTotal }}</td>
                     <td class="text-right">{{ $totalActive }}</td>
                     <td class="text-right">{{ $totalOffline }}</td>
-                    <td class="text-right">{{ $totalDead }}</td>
                     <td class="text-right">{{ $totalRetired }}</td>
                 </tr>
             </tfoot>
         </table>
-
-        <div class="summary-wrapper">
-            <div class="summary-box">
-                <div class="summary-title">Executive Performance Overview</div>
-                <table class="summary-stats" style="margin-bottom: 0;">
-                    <tr>
-                        <td class="summary-item-label" style="border-top:none;">Total Active Companies</td>
-                        <td class="summary-item-value" style="border-top:none;">{{ $companyStats->count() }}</td>
-                    </tr>
-                    <tr>
-                        <td class="summary-item-label">Total Assets Under Management</td>
-                        <td class="summary-item-value">{{ $grandTotal }}</td>
-                    </tr>
-                    <tr>
-                        <td class="summary-item-label" style="border-bottom:none;">Overall Operational Health Index</td>
-                        <td class="summary-item-value" style="border-bottom:none;">
-                            @if($grandTotal > 0)
-                                {{ number_format(($totalActive / $grandTotal) * 100, 1) }}%
-                            @else
-                                0.0%
-                            @endif
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
     </div>
 
     <div class="footer">
-        Confidential Asset Report &bull; Generated by Wemanage System &bull; Page {PAGE_NUM} of {PAGE_COUNT}
+        Standard Operating Procedure [SOP-IT-001] &bull; Internal Compliance Document &bull; Confidential &bull; Page {PAGE_NUM} of {PAGE_COUNT}
     </div>
 
     <script type="text/php">

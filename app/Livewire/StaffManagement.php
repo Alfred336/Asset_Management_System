@@ -238,13 +238,13 @@ class StaffManagement extends Component
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'email' => $this->email,
-            'phone' => $this->phone,
-            'position' => $this->position,
+            'phone' => $this->phone ?: null,
+            'position' => $this->position ?: null,
             'hire_date' => $this->hire_date ?: null,
-            'salary' => $this->salary,
+            'salary' => $this->salary ?: null,
             'employment_type' => $this->employment_type,
             'status' => $this->status,
-            'notes' => $this->notes,
+            'notes' => $this->notes ?: null,
         ]);
 
         $this->showEditModal = false;

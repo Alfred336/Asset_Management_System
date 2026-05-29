@@ -46,6 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware(['permission:view-users'])
         ->name('users.index');
 
+    // Report Download
+    Route::get('/reports/weekly-download', [\App\Http\Controllers\ReportController::class, 'download'])
+        ->name('reports.weekly-download');
+
     // Role Management
     Route::livewire('/roles', 'role-management')
         ->middleware(['permission:view-roles'])

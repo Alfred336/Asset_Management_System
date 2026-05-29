@@ -181,7 +181,7 @@
         </div>
 
           <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <flux:select wire:model="company_id" label="Company" required placeholder="Select a company" wire:change="loadStaffForCompany">
+              <flux:select wire:model="company_id" label="Company" badge="required" required placeholder="Select a company" wire:change="loadStaffForCompany">
                   <flux:select.option value="">Select a company</flux:select.option>
                   @foreach($companies as $company)
                       <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
@@ -195,11 +195,11 @@
                  @endforeach
              </flux:select>
 
-            <flux:input wire:model="asset_tag" label="Asset Tag" required />
+            <flux:input wire:model="asset_tag" label="Asset Tag" badge="required" required />
             <flux:input wire:model="serial_number" label="Serial Number" />
-            <flux:input wire:model="model" label="Model" required />
+            <flux:input wire:model="model" label="Model" badge="required" required />
             <flux:input wire:model="manufacturer" label="Manufacturer" />
-            <flux:input wire:model="device_type" label="Device Type" required />
+            <flux:input wire:model="device_type" label="Device Type" badge="required" required />
             <flux:input wire:model="operating_system" label="Operating System" />
 
             <div class="grid grid-cols-2 gap-4">
@@ -213,9 +213,6 @@
                 <flux:radio.group wire:model="storage_type" label="Storage type">
                     <flux:radio value="HDD" label="HDD" checked />
                     <flux:radio value="SSD" label="SSD" />
-                    <flux:radio value="NVMe" label="NVMe" />
-                    <flux:radio value="eMMC" label="eMMC" />
-                    <flux:radio value="Hybrid" label="Hybrid" />
                 </flux:radio.group>
             </div>
 
@@ -229,7 +226,7 @@
                 <flux:input wire:model="location" label="Location" />
             </div>
 
-            <flux:select wire:model="status" label="Status" required>
+            <flux:select wire:model="status" :label="'Status <span style=\'color: #ef4444; font-weight: bold;\'>*</span>'" required>
                 <flux:select.option value="active">Active</flux:select.option>
                 <flux:select.option value="offline">Offline</flux:select.option>
                 <flux:select.option value="online">Online</flux:select.option>
@@ -263,25 +260,25 @@
         </div>
 
           <form wire:submit.prevent="update" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <flux:select wire:model="company_id" label="Company" required placeholder="Select a company" wire:change="loadStaffForCompany">
+              <flux:select wire:model="company_id" label="Company" badge="required" required placeholder="Select a company" wire:change="loadStaffForCompany">
                   <flux:select.option value="">Select a company</flux:select.option>
                   @foreach($companies as $company)
                       <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
                   @endforeach
               </flux:select>
 
-             <flux:select wire:model="staff_id" label="Assigned Staff (Optional)" placeholder="Unassigned">
+             <flux:select wire:model="staff_id" label="Assigned Staff">
                  <flux:select.option value="">Unassigned</flux:select.option>
                  @foreach($staff as $staffMember)
                      <flux:select.option value="{{ $staffMember->id }}">{{ $staffMember->full_name }}</flux:select.option>
                  @endforeach
              </flux:select>
 
-            <flux:input wire:model="asset_tag" label="Asset Tag" required />
+            <flux:input wire:model="asset_tag" label="Asset Tag" badge="required" required />
             <flux:input wire:model="serial_number" label="Serial Number" />
-            <flux:input wire:model="model" label="Model" required />
+            <flux:input wire:model="model" label="Model" badge="required" required />
             <flux:input wire:model="manufacturer" label="Manufacturer" />
-            <flux:input wire:model="device_type" label="Device Type" required />
+            <flux:input wire:model="device_type" label="Device Type" badge="required" required />
             <flux:input wire:model="operating_system" label="Operating System" />
 
             <div class="grid grid-cols-2 gap-4">
@@ -299,7 +296,7 @@
             <flux:input wire:model="hostname" label="Hostname" />
             <flux:input wire:model="location" label="Location" />
 
-            <flux:select wire:model="status" label="Status" required>
+            <flux:select wire:model="status" label="Status" badge="required" required>
                 <flux:select.option value="active">Active</flux:select.option>
                 <flux:select.option value="offline">Offline</flux:select.option>
                 <flux:select.option value="online">Online</flux:select.option>

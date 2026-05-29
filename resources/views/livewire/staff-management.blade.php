@@ -155,31 +155,31 @@
         </div>
 
         <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <flux:select wire:model="company_id" label="Company" required placeholder="Select a company">
+            <flux:select wire:model="company_id" label="Company" badge="required" placeholder="Select a company" required>
                 @foreach($companies as $company)
                     <flux:select.option value="{{ $company->id }}">{{ $company->name }}</flux:select.option>
                 @endforeach
             </flux:select>
 
             <div class="grid grid-cols-2 gap-4">
-                <flux:input wire:model="first_name" label="First Name" required />
-                <flux:input wire:model="last_name" label="Last Name" required />
+                <flux:input wire:model="first_name" label="First Name" badge="required" required />
+                <flux:input wire:model="last_name" label="Last Name" badge="required" required />
             </div>
 
-            <flux:input type="email" wire:model="email" label="Email" required />
+            <flux:input type="email" wire:model="email" label="Email" badge="required" required />
             <flux:input type="tel" wire:model="phone" label="Phone" />
             <flux:input wire:model="position" label="Position" />
             <flux:input type="date" wire:model="hire_date" label="Hire Date" />
             <flux:input type="number" step="0.01" wire:model="salary" label="Salary" min="0" />
 
-            <flux:select wire:model="employment_type" label="Employment Type" required>
+            <flux:select wire:model="employment_type" label="Employment Type" badge="required" required>
                 <flux:select.option value="full_time">Full Time</flux:select.option>
                 <flux:select.option value="part_time">Part Time</flux:select.option>
                 <flux:select.option value="contract">Contract</flux:select.option>
                 <flux:select.option value="intern">Intern</flux:select.option>
             </flux:select>
 
-            <flux:select wire:model="status" label="Status" required>
+            <flux:select wire:model="status" label="Status" badge="required" required>
                 <flux:select.option value="active">Active</flux:select.option>
                 <flux:select.option value="inactive">Inactive</flux:select.option>
                 <flux:select.option value="on_leave">On Leave</flux:select.option>
@@ -213,24 +213,24 @@
             </flux:select>
 
             <div class="grid grid-cols-2 gap-4">
-                <flux:input wire:model="first_name" label="First Name" required />
-                <flux:input wire:model="last_name" label="Last Name" required />
+                <flux:input wire:model="first_name" label="First Name" badge="required" required />
+                <flux:input wire:model="last_name" label="Last Name" badge="required" required />
             </div>
 
-            <flux:input type="email" wire:model="email" label="Email" required />
+            <flux:input type="email" wire:model="email" label="Email" badge="required" required />
             <flux:input type="tel" wire:model="phone" label="Phone" />
             <flux:input wire:model="position" label="Position" />
             <flux:input type="date" wire:model="hire_date" label="Hire Date" />
             <flux:input type="number" step="0.01" wire:model="salary" label="Salary" min="0" />
 
-            <flux:select wire:model="employment_type" label="Employment Type" required>
+            <flux:select wire:model="employment_type" label="Employment Type" badge="required" required>
                 <flux:select.option value="full_time">Full Time</flux:select.option>
                 <flux:select.option value="part_time">Part Time</flux:select.option>
                 <flux:select.option value="contract">Contract</flux:select.option>
                 <flux:select.option value="intern">Intern</flux:select.option>
             </flux:select>
 
-            <flux:select wire:model="status" label="Status" required>
+            <flux:select wire:model="status" label="Status" badge="required" required>
                 <flux:select.option value="active">Active</flux:select.option>
                 <flux:select.option value="inactive">Inactive</flux:select.option>
                 <flux:select.option value="on_leave">On Leave</flux:select.option>

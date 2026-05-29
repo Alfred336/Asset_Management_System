@@ -33,7 +33,7 @@ test('weekly device report is sent to all active users', function () {
     ]);
 
     $this->artisan('app:send-weekly-device-report')
-        ->expectsOutput('Weekly device report sent to 2 users.')
+        ->expectsOutput('Weekly device status report sent to 2 users.')
         ->assertSuccessful();
 
     Notification::assertSentTo($users, WeeklyDeviceReportNotification::class);
