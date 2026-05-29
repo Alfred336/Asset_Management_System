@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "dev:with-backup": "concurrently \"vite\" \"node scripts/vite-backup-scheduler.js\""
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.1.11",
@@ -12,6 +13,7 @@
         "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
+        "node-cron": "^4.2.1",
         "tailwindcss": "^4.0.7",
         "vite": "^8.0.0"
     },

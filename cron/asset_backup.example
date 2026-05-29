@@ -1,0 +1,9 @@
+# Example cron entries for daily database backup
+# Replace /path/to/project with the absolute path to this repository.
+# Run daily at 02:00 and append logs to /var/log/asset_backup.log
+0 2 * * * /usr/bin/env bash /path/to/project/scripts/backup-db.sh >> /var/log/asset_backup.log 2>&1
+
+# OR as a system cron file (/etc/cron.d/asset_backup) with a user field:
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+0 2 * * * root /usr/bin/env bash /path/to/project/scripts/backup-db.sh >> /var/log/asset_backup.log 2>&1
