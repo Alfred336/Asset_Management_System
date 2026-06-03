@@ -1,0 +1,4 @@
+# Daily Laravel Scheduler Cron Job
+# Run Laravel's schedule:run every minute, which triggers scheduled tasks
+# This enables the backup:database command to run at midnight
+* * * * * cd /home/cyber/Desktop/Asset_Management_System && php artisan schedule:run >> /dev/null 2>&1
