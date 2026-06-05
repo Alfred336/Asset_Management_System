@@ -1,4 +1,5 @@
 <section class="mt-10 space-y-6">
+    @can('delete-user')
     <div class="relative mb-5">
         <flux:heading>{{ __('Delete account') }}</flux:heading>
         <flux:subheading>{{ __('Delete your account and all of its resources') }}</flux:subheading>
@@ -31,4 +32,5 @@
             </div>
         </form>
     </flux:modal>
+    @endcan
 </section>

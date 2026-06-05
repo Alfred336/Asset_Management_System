@@ -11,8 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('app:check-device-warranty-expiry')->daily();
 Schedule::command('app:send-daily-status-update-reminders')->dailyAt('08:00');
 Schedule::command('app:send-weekly-device-report')->fridays()->at('16:00');
-
-Schedule::command('backup:database')
-    ->dailyAt('00:00')
-    ->runInBackground()
-    ->withoutOverlapping();
+Schedule::command('backup:database')->dailyAt('00:00')->runInBackground()->withoutOverlapping();

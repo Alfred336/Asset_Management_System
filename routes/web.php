@@ -2,6 +2,7 @@
 
 use App\Livewire\VerifyEmailCode;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReportController;
 
 Route::view('/', 'welcome')->name('home');
 
@@ -18,42 +19,28 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')
-        ->name('dashboard');
+    Route::view('dashboard', 'dashboard')->name('dashboard');
 
     // Device Status Manager
-    Route::livewire('/technician', 'device-status-manager')
-        ->middleware(['permission:view-devices'])
-        ->name('technician.dashboard');
+    Route::livewire('/technician', 'device-status-manager')->middleware(['permission:view-devices'])->name('technician.dashboard');
 
     // Company Management
-    Route::livewire('/companies', 'company-management')
-        ->middleware(['permission:view-companies'])
-        ->name('companies.index');
+    Route::livewire('/companies', 'company-management')->middleware(['permission:view-companies'])->name('companies.index');
 
     // Staff Management
-    Route::livewire('/staff', 'staff-management')
-        ->middleware(['permission:view-staff'])
-        ->name('staff.index');
+    Route::livewire('/staff', 'staff-management')->middleware(['permission:view-staff'])->name('staff.index');
 
     // Device Management
-    Route::livewire('/devices', 'device-management')
-        ->middleware(['permission:view-devices'])
-        ->name('devices.index');
+    Route::livewire('/devices', 'device-management')->middleware(['permission:view-devices'])->name('devices.index');
 
     // User Management
-    Route::livewire('/users', 'user-management')
-        ->middleware(['permission:view-users'])
-        ->name('users.index');
+    Route::livewire('/users', 'user-management')->middleware(['permission:view-users'])->name('users.index');
 
     // Report Download
-    Route::get('/reports/weekly-download', [\App\Http\Controllers\ReportController::class, 'download'])
-        ->name('reports.weekly-download');
+    Route::get('/reports/weekly-download', [ReportController::class, 'download'])->name('reports.weekly-download');
 
     // Role Management
-    Route::livewire('/roles', 'role-management')
-        ->middleware(['permission:view-roles'])
-        ->name('roles.index');
+    Route::livewire('/roles', 'role-management')->middleware(['permission:view-roles'])->name('roles.index');
 });
 
 require __DIR__.'/settings.php';
