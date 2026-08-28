@@ -12,8 +12,8 @@
     @if($devices->isEmpty())
         <div class="py-12 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-2xl">
             <flux:icon name="shield-check" class="size-10 text-zinc-300 mb-3" />
-            <flux:text color="zinc" class="font-medium text-sm">{{ __('No upcoming expiries found.') }}</flux:text>
-            <flux:text color="zinc" size="xs">{{ __('All assets are currently within their warranty lifecycle.') }}</flux:text>
+            <flux:text variant="subtle" class="font-medium text-sm">{{ __('No upcoming expiries found.') }}</flux:text>
+            <flux:text variant="subtle" size="xs">{{ __('All assets are currently within their warranty lifecycle.') }}</flux:text>
         </div>
     @else
         <div class="relative overflow-hidden rounded-xl border border-zinc-100 dark:border-zinc-800/50">
@@ -33,16 +33,16 @@
                                     <span class="text-xs text-zinc-500">{{ $device->model }}</span>
                                 </div>
                             </flux:table.cell>
-                            <flux:table.cell class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ $device->company->name }}</flux:table.cell>
+                            <flux:table.cell class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ $device->company?->name }}</flux:table.cell>
                             <flux:table.cell align="end">
                                 @php
-                                    $days = now()->diffInDays($device->warranty_expiry);
+                                    $days = (int) now()->diffInDays($device->warranty_expiry, false);
                                     $color = $days < 30 ? 'warning' : 'zinc';
                                     $variant = $days < 30 ? 'solid' : 'outline';
                                 @endphp
                                 <div class="flex flex-col items-end gap-1">
                                     <flux:badge :color="$color" :variant="$variant" size="sm" class="font-bold tracking-tight">
-                                        {{ $device->warranty_expiry->format('M d, Y') }}
+                                        {{ $device->warranty_expiry?->format('M d, Y') }}
                                     </flux:badge>
                                     <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">
                                         {{ $days }} {{ __('days remaining') }}
@@ -56,7 +56,7 @@
         </div>
         
         <div class="mt-8 flex items-center justify-between pt-6 border-t border-zinc-100 dark:border-zinc-800 relative">
-            <flux:text size="xs" color="zinc" class="italic">{{ __('Showing most critical lifecycle risks.') }}</flux:text>
+            <flux:text size="xs" variant="subtle" class="italic">{{ __('Showing most critical lifecycle risks.') }}</flux:text>
             <flux:link :href="route('devices.index')" class="text-xs font-bold uppercase tracking-widest text-brand-600 hover:text-brand-700 transition-colors">{{ __('Manage Inventory') }} →</flux:link>
         </div>
     @endif

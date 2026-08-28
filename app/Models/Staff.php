@@ -32,6 +32,24 @@ class Staff extends Model
     ];
 
     /**
+     * Scope a query to only include staff belonging to companies accessible by the given user.
+     */
+    public function scopeForUser($query, ?User $user = null)
+    {
+        $user = $user ?: auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->canAccessAllCompanies()) {
+            return $query;
+        }
+
+        return $query->whereIn('company_id', $user->accessibleCompanyIds());
+    }
+
+    /**
      * Get the company that the staff member belongs to.
      */
     public function company()

@@ -19,10 +19,11 @@ class DashboardStats extends Component
 
     public function mount(): void
     {
-        $this->deviceCount = Device::count();
-        $this->staffCount = Staff::count();
-        $this->companyCount = Company::count();
-        $this->expiringSoon = Device::where('warranty_expiry', '<=', now()->addDays(30))
+        $this->deviceCount = Device::forUser()->count();
+        $this->staffCount = Staff::forUser()->count();
+        $this->companyCount = Company::forUser()->count();
+        $this->expiringSoon = Device::forUser()
+            ->where('warranty_expiry', '<=', now()->addDays(30))
             ->where('warranty_expiry', '>=', now())
             ->count();
     }

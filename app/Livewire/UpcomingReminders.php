@@ -11,7 +11,8 @@ class UpcomingReminders extends Component
 
     public function mount(): void
     {
-        $this->devices = Device::with('company')
+        $this->devices = Device::forUser()
+            ->with('company')
             ->where('warranty_expiry', '<=', now()->addDays(60))
             ->where('warranty_expiry', '>=', now())
             ->orderBy('warranty_expiry', 'asc')

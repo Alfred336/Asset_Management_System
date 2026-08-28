@@ -20,15 +20,21 @@ class DevicesImport implements ToModel, WithHeadingRow, WithValidation
         // Try to find company by name if company_id is not a number
         $companyId = $row['company_id'] ?? null;
         if ($companyId && ! is_numeric($companyId)) {
-            $company = Company::where('name', $companyId)->first();
+            $company = Company::forUser()->where('name', $companyId)->first();
             $companyId = $company?->id;
+        }
+
+        if (! $companyId || (auth()->check() && ! auth()->user()->hasAccessToCompany($companyId))) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'company_id' => ['Unauthorized company or invalid company specified in import row: '.($row['company_id'] ?? 'null')],
+            ]);
         }
 
         // Try to find staff by name if staff_id is not a number
         $staffId = $row['staff_id'] ?? null;
         if ($staffId && ! is_numeric($staffId)) {
             // Assuming full_name search or similar
-            $staff = Staff::where(function ($query) use ($staffId) {
+            $staff = Staff::forUser()->where('company_id', $companyId)->where(function ($query) use ($staffId) {
                 $query->where('first_name', 'like', "%$staffId%")
                     ->orWhere('last_name', 'like', "%$staffId%");
             })->first();

@@ -63,7 +63,7 @@
                         @if($device->statusHistory->first())
                             <flux:text size="sm">{{ $device->statusHistory->first()->created_at->diffForHumans() }}</flux:text>
                         @else
-                            <flux:text size="sm" color="zinc">Never</flux:text>
+                            <flux:text size="sm" variant="subtle">Never</flux:text>
                         @endif
                     </flux:table.cell>
                     <flux:table.cell align="end">
@@ -122,7 +122,7 @@
         @endphp
 
         @if($historyItems->isEmpty())
-            <flux:text color="zinc">No status history recorded yet.</flux:text>
+            <flux:text variant="subtle">No status history recorded yet.</flux:text>
         @else
             <flux:table>
                 <flux:table.columns>

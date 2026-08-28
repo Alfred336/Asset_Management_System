@@ -157,7 +157,7 @@ class DeviceManagement extends Component
 
     public function loadCompaniesAndStaff()
     {
-        $this->companies = Company::where('status', 'active')->orderBy('name')->get();
+        $this->companies = Company::forUser()->where('status', 'active')->orderBy('name')->get();
         $this->staff = collect(); // Empty collection, will be populated when company is selected
     }
 
@@ -165,8 +165,9 @@ class DeviceManagement extends Component
     {
         $companyId = $companyId ?: $this->company_id;
 
-        if ($companyId) {
-            $this->staff = Staff::where('company_id', $companyId)
+        if ($companyId && auth()->user()->hasAccessToCompany($companyId)) {
+            $this->staff = Staff::forUser()
+                ->where('company_id', $companyId)
                 ->where('status', 'active')
                 ->orderBy('first_name')
                 ->orderBy('last_name')
@@ -181,27 +182,30 @@ class DeviceManagement extends Component
 
     public function render()
     {
-        $companies = Company::where('status', 'active')->orderBy('name')->get();
+        $companies = Company::forUser()->where('status', 'active')->orderBy('name')->get();
 
         // Load staff based on selected company or all active staff if no company selected
-        if ($this->companyFilter) {
-            $staff = Staff::where('company_id', $this->companyFilter)
+        if ($this->companyFilter && auth()->user()->hasAccessToCompany($this->companyFilter)) {
+            $staff = Staff::forUser()
+                ->where('company_id', $this->companyFilter)
                 ->where('status', 'active')
                 ->orderBy('first_name')
                 ->orderBy('last_name')
                 ->get();
-        } elseif ($this->company_id) {
+        } elseif ($this->company_id && auth()->user()->hasAccessToCompany($this->company_id)) {
             // For create/edit forms, load staff of selected company
-            $staff = Staff::where('company_id', $this->company_id)
+            $staff = Staff::forUser()
+                ->where('company_id', $this->company_id)
                 ->where('status', 'active')
                 ->orderBy('first_name')
                 ->orderBy('last_name')
                 ->get();
         } else {
-            $staff = Staff::where('status', 'active')->orderBy('first_name')->orderBy('last_name')->get();
+            $staff = Staff::forUser()->where('status', 'active')->orderBy('first_name')->orderBy('last_name')->get();
         }
 
-        $deviceQuery = Device::with(['company', 'staff'])
+        $deviceQuery = Device::forUser()
+            ->with(['company', 'staff'])
             ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
                 $search = trim($this->search);
@@ -229,7 +233,8 @@ class DeviceManagement extends Component
         $devices = $deviceQuery->paginate($this->perPage);
 
         // Get unique device types for filter dropdown
-        $deviceTypes = Device::whereNull('deleted_at')
+        $deviceTypes = Device::forUser()
+            ->whereNull('deleted_at')
             ->orderBy('device_type')
             ->pluck('device_type')
             ->unique();
@@ -271,6 +276,18 @@ class DeviceManagement extends Component
             return;
         }
 
+        if (! auth()->user()->hasAccessToCompany($this->company_id)) {
+            session()->flash('error', 'You do not have access to the selected company.');
+
+            return;
+        }
+
+        if ($this->staff_id && ! Staff::forUser()->where('id', $this->staff_id)->where('company_id', $this->company_id)->exists()) {
+            session()->flash('error', 'The selected staff member is not valid for this company.');
+
+            return;
+        }
+
         Device::create([
             'company_id' => $this->company_id,
             'staff_id' => $this->staff_id ?: null,
@@ -303,7 +320,7 @@ class DeviceManagement extends Component
 
     public function edit($id)
     {
-        $device = Device::withTrashed()->with(['company', 'staff'])->findOrFail($id);
+        $device = Device::forUser()->withTrashed()->with(['company', 'staff'])->findOrFail($id);
 
         // Check if the user has permission to edit devices
         if (Gate::denies('edit-devices')) {
@@ -347,7 +364,7 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::withTrashed()->with(['company', 'staff'])->findOrFail($id);
+        $device = Device::forUser()->withTrashed()->with(['company', 'staff'])->findOrFail($id);
 
         $this->viewingDevice = [
             'asset_tag' => $device->asset_tag,
@@ -391,7 +408,19 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::withTrashed()->findOrFail($this->deviceId);
+        if (! auth()->user()->hasAccessToCompany($this->company_id)) {
+            session()->flash('error', 'You do not have access to the selected company.');
+
+            return;
+        }
+
+        if ($this->staff_id && ! Staff::forUser()->where('id', $this->staff_id)->where('company_id', $this->company_id)->exists()) {
+            session()->flash('error', 'The selected staff member is not valid for this company.');
+
+            return;
+        }
+
+        $device = Device::forUser()->withTrashed()->findOrFail($this->deviceId);
         $device->update([
             'company_id' => $this->company_id,
             'staff_id' => $this->staff_id ?: null,
@@ -431,6 +460,8 @@ class DeviceManagement extends Component
             return;
         }
 
+        $device = Device::forUser()->findOrFail($id);
+
         $this->idToDelete = $id;
         $this->showDeleteConfirmation = true;
     }
@@ -441,7 +472,7 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::findOrFail($this->idToDelete);
+        $device = Device::forUser()->findOrFail($this->idToDelete);
         $device->delete();
 
         $this->showDeleteConfirmation = false;
@@ -458,7 +489,7 @@ class DeviceManagement extends Component
             return;
         }
 
-        $device = Device::withTrashed()->findOrFail($id);
+        $device = Device::forUser()->withTrashed()->findOrFail($id);
         $device->restore();
 
         session()->flash('message', 'Device restored successfully.');

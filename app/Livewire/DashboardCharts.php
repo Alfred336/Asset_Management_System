@@ -13,14 +13,16 @@ class DashboardCharts extends Component
 
     public function mount(): void
     {
-        $statusCounts = Device::selectRaw('status, count(*) as count')
+        $statusCounts = Device::forUser()
+            ->selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->orderBy('status')
             ->get()
             ->pluck('count', 'status')
             ->all();
 
-        $typeCounts = Device::selectRaw('device_type, count(*) as count')
+        $typeCounts = Device::forUser()
+            ->selectRaw('device_type, count(*) as count')
             ->groupBy('device_type')
             ->orderBy('device_type')
             ->get()

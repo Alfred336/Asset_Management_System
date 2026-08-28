@@ -89,9 +89,10 @@ class StaffManagement extends Component
 
     public function render()
     {
-        $companies = Company::where('status', 'active')->get();
+        $companies = Company::forUser()->where('status', 'active')->get();
 
-        $staffQuery = Staff::with('company')
+        $staffQuery = Staff::forUser()
+            ->with('company')
             ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
                 $query->where('first_name', 'like', '%'.$this->search.'%')
@@ -144,6 +145,12 @@ class StaffManagement extends Component
             return;
         }
 
+        if (! auth()->user()->hasAccessToCompany($this->company_id)) {
+            session()->flash('error', 'You do not have access to the selected company.');
+
+            return;
+        }
+
         Staff::create([
             'company_id' => $this->company_id,
             'first_name' => $this->first_name,
@@ -165,7 +172,7 @@ class StaffManagement extends Component
 
     public function edit($id)
     {
-        $staff = Staff::withTrashed()->with('company')->findOrFail($id);
+        $staff = Staff::forUser()->withTrashed()->with('company')->findOrFail($id);
 
         // Check if the user has permission to edit staff
         if (Gate::denies('edit-staff')) {
@@ -198,7 +205,7 @@ class StaffManagement extends Component
             return;
         }
 
-        $staff = Staff::withTrashed()->with(['company', 'devices'])->findOrFail($id);
+        $staff = Staff::forUser()->withTrashed()->with(['company', 'devices'])->findOrFail($id);
 
         $this->viewingStaff = [
             'full_name' => $staff->full_name,
@@ -232,7 +239,13 @@ class StaffManagement extends Component
             return;
         }
 
-        $staff = Staff::withTrashed()->findOrFail($this->staffId);
+        if (! auth()->user()->hasAccessToCompany($this->company_id)) {
+            session()->flash('error', 'You do not have access to the selected company.');
+
+            return;
+        }
+
+        $staff = Staff::forUser()->withTrashed()->findOrFail($this->staffId);
         $staff->update([
             'company_id' => $this->company_id,
             'first_name' => $this->first_name,
@@ -261,6 +274,8 @@ class StaffManagement extends Component
             return;
         }
 
+        $staff = Staff::forUser()->findOrFail($id);
+
         $this->idToDelete = $id;
         $this->showDeleteConfirmation = true;
     }
@@ -271,7 +286,7 @@ class StaffManagement extends Component
             return;
         }
 
-        $staff = Staff::findOrFail($this->idToDelete);
+        $staff = Staff::forUser()->findOrFail($this->idToDelete);
         $staff->delete();
 
         $this->showDeleteConfirmation = false;
@@ -288,7 +303,7 @@ class StaffManagement extends Component
             return;
         }
 
-        $staff = Staff::withTrashed()->findOrFail($id);
+        $staff = Staff::forUser()->withTrashed()->findOrFail($id);
         $staff->restore();
 
         session()->flash('message', 'Staff member restored successfully.');

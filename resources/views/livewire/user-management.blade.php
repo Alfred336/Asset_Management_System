@@ -30,6 +30,7 @@
                 <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('name')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Identity</flux:table.column>
                 <flux:table.column sortable :sorted="$sortField === 'email'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('email')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Contact</flux:table.column>
                 <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Role</flux:table.column>
+                <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Assigned Companies</flux:table.column>
                 <flux:table.column class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Status</flux:table.column>
                 <flux:table.column align="end" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Actions</flux:table.column>
             </flux:table.columns>
@@ -44,6 +45,19 @@
                                 <flux:badge color="pink" variant="outline" size="sm" class="font-bold uppercase text-[10px]">{{ $user->roles->first()->name }}</flux:badge>
                             @else
                                 <span class="text-[10px] uppercase tracking-wider text-zinc-400">—</span>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @if($user->canAccessAllCompanies())
+                                <flux:badge color="purple" variant="outline" size="sm" class="font-bold uppercase text-[10px]">All Companies (Admin)</flux:badge>
+                            @elseif($user->companies->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($user->companies as $comp)
+                                        <flux:badge color="zinc" variant="subtle" size="sm" class="text-[10px]">{{ $comp->name }}</flux:badge>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-[10px] uppercase tracking-wider text-zinc-400">None</span>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
@@ -103,6 +117,20 @@
                     <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
                 @endforeach
             </flux:select>
+            <div>
+                <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Assigned Companies / Workplaces</label>
+                <div class="max-h-40 overflow-y-auto space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    @forelse($companies as $company)
+                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer">
+                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-pink-600 focus:ring-pink-500 dark:border-zinc-700 dark:bg-zinc-800" />
+                            <span>{{ $company->name }}</span>
+                        </label>
+                    @empty
+                        <p class="text-xs text-zinc-500">No active companies available.</p>
+                    @endforelse
+                </div>
+                <p class="text-xs text-zinc-500 mt-1">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
+            </div>
             <div class="flex gap-2 pt-2">
                 <flux:spacer />
                 <flux:button variant="ghost" wire:click="showCreateModal = false">Cancel</flux:button>
@@ -127,6 +155,21 @@
                     <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
                 @endforeach
             </flux:select>
+
+            <div>
+                <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Assigned Companies / Workplaces</label>
+                <div class="max-h-40 overflow-y-auto space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    @forelse($companies as $company)
+                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer">
+                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-pink-600 focus:ring-pink-500 dark:border-zinc-700 dark:bg-zinc-800" />
+                            <span>{{ $company->name }}</span>
+                        </label>
+                    @empty
+                        <p class="text-xs text-zinc-500">No active companies available.</p>
+                    @endforelse
+                </div>
+                <p class="text-xs text-zinc-500 mt-1">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
+            </div>
 
             <flux:select wire:model="status" label="Status">
                 <flux:select.option value="active">Active</flux:select.option>

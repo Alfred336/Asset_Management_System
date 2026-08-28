@@ -35,9 +35,10 @@ class DeviceStatusManager extends Component
 
     public function render()
     {
-        $devices = Device::with(['company', 'staff', 'statusHistory' => function ($query) {
-            $query->latest()->limit(1);
-        }])
+        $devices = Device::forUser()
+            ->with(['company', 'staff', 'statusHistory' => function ($query) {
+                $query->latest()->limit(1);
+            }])
             ->where(function ($query) {
                 $query->where('asset_tag', 'like', '%'.$this->search.'%')
                     ->orWhere('model', 'like', '%'.$this->search.'%')
@@ -49,7 +50,7 @@ class DeviceStatusManager extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        $companies = Company::where('status', 'active')->get();
+        $companies = Company::forUser()->where('status', 'active')->get();
 
         return view('livewire.device-status-manager', [
             'devices' => $devices,
@@ -59,7 +60,7 @@ class DeviceStatusManager extends Component
 
     public function openStatusUpdate($deviceId)
     {
-        $device = Device::findOrFail($deviceId);
+        $device = Device::forUser()->findOrFail($deviceId);
 
         if (Gate::denies('update-device-status')) {
             session()->flash('error', 'You do not have permission to update device status.');
@@ -77,7 +78,7 @@ class DeviceStatusManager extends Component
     {
         $this->validate();
 
-        $device = Device::findOrFail($this->deviceId);
+        $device = Device::forUser()->findOrFail($this->deviceId);
         $oldStatus = $device->status;
 
         $device->status = $this->status;
@@ -98,7 +99,7 @@ class DeviceStatusManager extends Component
 
     public function viewHistory($deviceId)
     {
-        $device = Device::with(['statusHistory.changedBy'])->findOrFail($deviceId);
+        $device = Device::forUser()->with(['statusHistory.changedBy'])->findOrFail($deviceId);
 
         if (Gate::denies('view-device-status-history')) {
             session()->flash('error', 'You do not have permission to view status history.');
@@ -116,7 +117,8 @@ class DeviceStatusManager extends Component
             return collect();
         }
 
-        return DeviceStatusHistory::where('device_id', $this->deviceId)
+        return DeviceStatusHistory::forUser()
+            ->where('device_id', $this->deviceId)
             ->with('changedBy')
             ->orderBy('created_at', 'desc')
             ->limit(50)

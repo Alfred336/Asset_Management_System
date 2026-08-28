@@ -44,6 +44,24 @@ class Device extends Model
         'status' => 'string',
     ];
 
+    /**
+     * Scope a query to only include devices belonging to companies accessible by the given user.
+     */
+    public function scopeForUser($query, ?User $user = null)
+    {
+        $user = $user ?: auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->canAccessAllCompanies()) {
+            return $query;
+        }
+
+        return $query->whereIn('company_id', $user->accessibleCompanyIds());
+    }
+
     public function company()
     {
         return $this->belongsTo(Company::class);

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Support\Facades\View;
@@ -13,16 +14,18 @@ class DeviceReportPdf
      *
      * @return array
      */
-    public function getReportData(): array
+    public function getReportData(?User $user = null): array
     {
-        $companyStats = \App\Models\Device::query()
+        $user = $user ?: auth()->user();
+
+        $companyStats = \App\Models\Device::forUser($user)
             ->join('companies', 'devices.company_id', '=', 'companies.id')
             ->select('companies.name as company_name')
             ->selectRaw('count(*) as total')
-            ->selectRaw('count(case when devices.status in ("active", "online") then 1 end) as active_count')
-            ->selectRaw('count(case when devices.status = "offline" then 1 end) as offline_count')
-            ->selectRaw('count(case when devices.status = "dead" then 1 end) as dead_count')
-            ->selectRaw('count(case when devices.status = "retired" then 1 end) as retired_count')
+            ->selectRaw("count(case when devices.status in ('active', 'online') then 1 end) as active_count")
+            ->selectRaw("count(case when devices.status = 'offline' then 1 end) as offline_count")
+            ->selectRaw("count(case when devices.status = 'dead' then 1 end) as dead_count")
+            ->selectRaw("count(case when devices.status = 'retired' then 1 end) as retired_count")
             ->whereNull('devices.deleted_at')
             ->groupBy('companies.id', 'companies.name')
             ->orderBy('companies.name')
@@ -56,10 +59,10 @@ class DeviceReportPdf
      * @param  array|null  $period
      * @return string
      */
-    public function generate($companyStats = null, ?array $grandTotals = null, ?array $period = null): string
+    public function generate($companyStats = null, ?array $grandTotals = null, ?array $period = null, ?User $user = null): string
     {
         if (!$companyStats || !$grandTotals || !$period) {
-            $data = $this->getReportData();
+            $data = $this->getReportData($user);
             $companyStats = $data['companyStats'];
             $grandTotals = $data['grandTotals'];
             $period = $data['period'];

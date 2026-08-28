@@ -29,7 +29,7 @@
                     <flux:table.cell class="font-medium">{{ $role->name }}</flux:table.cell>
                     <flux:table.cell>
                         @if($role->permissions->isEmpty())
-                            <flux:text color="zinc" size="sm">No permissions assigned</flux:text>
+                            <flux:text variant="subtle" size="sm">No permissions assigned</flux:text>
                         @else
                             <div class="flex flex-wrap gap-2">
                                 @foreach ($role->permissions as $permission)

@@ -13,7 +13,7 @@
                 @forelse(auth()->user()->unreadNotifications->take(10) as $notification)
                     <flux:menu.item class="flex flex-col items-start gap-1">
                         <flux:text size="sm" class="font-medium">{{ $notification->data['message'] ?? 'New Notification' }}</flux:text>
-                        <flux:text size="xs" color="zinc">{{ $notification->created_at->diffForHumans() }}</flux:text>
+                        <flux:text size="xs" variant="subtle">{{ $notification->created_at->diffForHumans() }}</flux:text>
                     </flux:menu.item>
                 @empty
                     <flux:menu.item class="text-zinc-500">{{ __('No new notifications') }}</flux:menu.item>

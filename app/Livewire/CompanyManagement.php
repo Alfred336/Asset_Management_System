@@ -72,7 +72,7 @@ class CompanyManagement extends Component
 
     public function render()
     {
-        $companies = Company::query()
+        $companies = Company::forUser()
             ->when($this->showTrashed, fn ($query) => $query->withTrashed())
             ->where(function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%')
@@ -118,7 +118,7 @@ class CompanyManagement extends Component
             return;
         }
 
-        Company::create([
+        $company = Company::create([
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
@@ -128,6 +128,11 @@ class CompanyManagement extends Component
             'status' => $this->status,
         ]);
 
+        // Automatically assign created company to the creating user if not super admin
+        if (! auth()->user()->canAccessAllCompanies()) {
+            auth()->user()->companies()->attach($company->id);
+        }
+
         $this->showCreateModal = false;
         $this->resetInputFields();
         session()->flash('message', 'Company created successfully.');
@@ -135,7 +140,7 @@ class CompanyManagement extends Component
 
     public function edit($id)
     {
-        $company = Company::withTrashed()->findOrFail($id);
+        $company = Company::forUser()->withTrashed()->findOrFail($id);
 
         // Check if the user has permission to edit companies
         if (Gate::denies('edit-companies')) {
@@ -164,7 +169,8 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::withTrashed()
+        $company = Company::forUser()
+            ->withTrashed()
             ->withCount(['staff', 'devices'])
             ->findOrFail($id);
 
@@ -198,7 +204,7 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::withTrashed()->findOrFail($this->companyId);
+        $company = Company::forUser()->withTrashed()->findOrFail($this->companyId);
         $company->update([
             'name' => $this->name,
             'email' => $this->email,
@@ -223,6 +229,8 @@ class CompanyManagement extends Component
             return;
         }
 
+        $company = Company::forUser()->findOrFail($id);
+
         $this->idToDelete = $id;
         $this->showDeleteConfirmation = true;
     }
@@ -233,7 +241,7 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::findOrFail($this->idToDelete);
+        $company = Company::forUser()->findOrFail($this->idToDelete);
         $company->delete();
 
         $this->showDeleteConfirmation = false;
@@ -250,7 +258,7 @@ class CompanyManagement extends Component
             return;
         }
 
-        $company = Company::withTrashed()->findOrFail($id);
+        $company = Company::forUser()->withTrashed()->findOrFail($id);
         $company->restore();
 
         session()->flash('message', 'Company restored successfully.');

@@ -17,4 +17,12 @@ class DeviceStatusHistory extends Model
     {
         return $this->belongsTo(User::class, 'changed_by');
     }
+
+    public function scopeForUser($query, ?User $user = null)
+    {
+        return $query->whereHas('device', function ($q) use ($user) {
+            $q->forUser($user);
+        });
+    }
 }
+

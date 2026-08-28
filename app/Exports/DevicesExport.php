@@ -15,7 +15,7 @@ class DevicesExport implements FromCollection, WithHeadings, WithMapping
      */
     public function collection()
     {
-        return Device::with(['company', 'staff'])->get();
+        return Device::forUser()->with(['company', 'staff'])->get();
     }
 
     public function headings(): array
