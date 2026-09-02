@@ -11,7 +11,7 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid gap-0.5">
+                <flux:sidebar.group :heading="__('Main')" class="grid gap-0.5">
                     @can('view-dashboard')
                      <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                          {{ __('Dashboard') }}
@@ -22,21 +22,27 @@
                          {{ __('Quick Status') }}
                      </flux:sidebar.item>
                      @endcan
-                     @can('view-companies')
-                     <flux:sidebar.item icon="building-office" :href="route('companies.index')" :current="request()->routeIs('companies.index')" wire:navigate>
-                         {{ __('Companies') }}
-                     </flux:sidebar.item>
-                     @endcan
-                     @can('view-staff')
-                    <flux:sidebar.item icon="users" :href="route('staff.index')" :current="request()->routeIs('staff.index')" wire:navigate>
-                        {{ __('Staff') }}
-                    </flux:sidebar.item>
-                     @endcan
-                     @can('view-devices')
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Asset Management')" class="grid gap-0.5">
+                    @can('view-devices')
                     <flux:sidebar.item icon="computer-desktop" :href="route('devices.index')" :current="request()->routeIs('devices.index')" wire:navigate>
                         {{ __('Devices') }}
                     </flux:sidebar.item>
                     @endcan
+                    @can('view-staff')
+                    <flux:sidebar.item icon="users" :href="route('staff.index')" :current="request()->routeIs('staff.index')" wire:navigate>
+                        {{ __('Staff') }}
+                    </flux:sidebar.item>
+                    @endcan
+                    @can('view-companies')
+                    <flux:sidebar.item icon="building-office" :href="route('companies.index')" :current="request()->routeIs('companies.index')" wire:navigate>
+                        {{ __('Companies') }}
+                    </flux:sidebar.item>
+                    @endcan
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Administration')" class="grid gap-0.5">
                     @can('view-users')
                     <flux:sidebar.item icon="user-group" :href="route('users.index')" :current="request()->routeIs('users.index')" wire:navigate>
                         {{ __('Users') }}

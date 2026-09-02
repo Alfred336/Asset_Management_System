@@ -1,12 +1,12 @@
 <div class="space-y-8 p-4 lg:p-0">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
+        <div class="space-y-1">
             <flux:heading size="xl" level="1" class="font-black tracking-tight">Client Entities</flux:heading>
             <flux:subheading>Registry of managed business organizations.</flux:subheading>
         </div>
 
         @can('create-companies')
-            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-brand-500/20">Register Entity</flux:button>
+            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-sm">Register Entity</flux:button>
         @endcan
     </div>
 
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Table -->
-    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden premium-card">
         <flux:table :paginate="$companies">
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortAsc ? 'asc' : 'desc'" wire:click="sortBy('name')" class="!bg-zinc-50/50 dark:!bg-zinc-800/20">Organization Name</flux:table.column>
@@ -38,7 +38,7 @@
 
             <flux:table.rows>
                 @foreach ($companies as $company)
-                    <flux:table.row :key="$company->id" class="group hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                    <flux:table.row :key="$company->id" class="group hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
                         <flux:table.cell>
                             <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $company->name }}</span>
                         </flux:table.cell>
@@ -93,12 +93,17 @@
 
     <!-- Details Modal -->
     <flux:modal wire:model="showDetailsModal" variant="wide" class="space-y-6">
-        <div>
-            <flux:heading size="lg">{{ $viewingCompany['name'] ?? 'Company Details' }}</flux:heading>
-            <flux:subheading>{{ $viewingCompany['email'] ?? 'View company information.' }}</flux:subheading>
+        <div class="flex items-center justify-between">
+            <div>
+                <flux:heading size="lg">{{ $viewingCompany['name'] ?? 'Company Details' }}</flux:heading>
+                <flux:subheading>{{ $viewingCompany['email'] ?? 'View company information.' }}</flux:subheading>
+            </div>
+            <flux:badge :color="$viewingCompany['status'] === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+                {{ $viewingCompany['status'] ?? 'Unknown' }}
+            </flux:badge>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
             @foreach([
                 'Name' => $viewingCompany['name'] ?? null,
                 'Email' => $viewingCompany['email'] ?? null,
@@ -110,15 +115,15 @@
                 'Device Count' => $viewingCompany['device_count'] ?? null,
                 'Deleted At' => $viewingCompany['deleted_at'] ?? null,
             ] as $label => $value)
-                <div>
-                    <div class="text-xs font-medium text-zinc-500">{{ $label }}</div>
-                    <div class="mt-1 text-zinc-900 dark:text-zinc-100">{{ filled($value) ? $value : 'N/A' }}</div>
+                <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">{{ $label }}</div>
+                    <div class="mt-1 text-zinc-900 dark:text-zinc-100 font-medium">{{ filled($value) ? $value : 'N/A' }}</div>
                 </div>
             @endforeach
 
-            <div class="md:col-span-2">
-                <div class="text-xs font-medium text-zinc-500">Address</div>
-                <div class="mt-1 whitespace-pre-line text-zinc-900 dark:text-zinc-100">{{ filled($viewingCompany['address'] ?? null) ? $viewingCompany['address'] : 'N/A' }}</div>
+            <div class="md:col-span-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Address</div>
+                <div class="mt-1 whitespace-pre-line text-zinc-900 dark:text-zinc-100 font-medium">{{ filled($viewingCompany['address'] ?? null) ? $viewingCompany['address'] : 'N/A' }}</div>
             </div>
         </div>
 
@@ -130,28 +135,32 @@
 
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" variant="wide" class="space-y-6">
-        <div>
-            <flux:heading size="lg">Register Entity</flux:heading>
-            <flux:subheading>Enter organization profile details.</flux:subheading>
+        <div class="flex items-center justify-between">
+            <div>
+                <flux:heading size="lg">Register Entity</flux:heading>
+                <flux:subheading>Enter organization profile details.</flux:subheading>
+            </div>
         </div>
 
         <form wire:submit.prevent="create" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <flux:input wire:model="name" label="Company Name" required />
-            <flux:input type="email" wire:model="email" label="Email" required />
-            <flux:input wire:model="phone" label="Phone" />
-            <flux:input wire:model="website" label="Website" placeholder="https://..." />
-            <flux:input wire:model="tax_id" label="Tax ID / Registration Number" />
-
-            <flux:select wire:model="status" label="Status" required>
-                <flux:select.option value="active">Active</flux:select.option>
-                <flux:select.option value="inactive">Inactive</flux:select.option>
-            </flux:select>
-
+            <div class="space-y-6">
+                <flux:input wire:model="name" label="Company Name" required />
+                <flux:input type="email" wire:model="email" label="Email" required />
+                <flux:input wire:model="phone" label="Phone" />
+                <flux:input wire:model="website" label="Website" placeholder="https://..." />
+            </div>
+            <div class="space-y-6">
+                <flux:input wire:model="tax_id" label="Tax ID / Registration Number" />
+                <flux:select wire:model="status" label="Status" required>
+                    <flux:select.option value="active">Active</flux:select.option>
+                    <flux:select.option value="inactive">Inactive</flux:select.option>
+                </flux:select>
+            </div>
             <div class="col-span-full">
                 <flux:textarea wire:model="address" label="Address" rows="3" />
             </div>
 
-            <div class="flex col-span-full gap-2">
+            <div class="flex col-span-full gap-2 pt-4">
                 <flux:spacer />
                 <flux:button variant="ghost" wire:click="showCreateModal = false">Cancel</flux:button>
                 <flux:button type="submit" variant="primary">Add Company</flux:button>
@@ -161,28 +170,32 @@
 
     <!-- Edit Modal -->
     <flux:modal wire:model="showEditModal" variant="wide" class="space-y-6">
-        <div>
-            <flux:heading size="lg">Edit Entity</flux:heading>
-            <flux:subheading>Update organization profile information.</flux:subheading>
+        <div class="flex items-center justify-between">
+            <div>
+                <flux:heading size="lg">Edit Entity</flux:heading>
+                <flux:subheading>Update organization profile information.</flux:subheading>
+            </div>
         </div>
 
         <form wire:submit.prevent="update" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <flux:input wire:model="name" label="Company Name" required />
-            <flux:input type="email" wire:model="email" label="Email" required />
-            <flux:input wire:model="phone" label="Phone" />
-            <flux:input wire:model="website" label="Website" />
-            <flux:input wire:model="tax_id" label="Tax ID / Registration Number" />
-
-            <flux:select wire:model="status" label="Status" required>
-                <flux:select.option value="active">Active</flux:select.option>
-                <flux:select.option value="inactive">Inactive</flux:select.option>
-            </flux:select>
-
+            <div class="space-y-6">
+                <flux:input wire:model="name" label="Company Name" required />
+                <flux:input type="email" wire:model="email" label="Email" required />
+                <flux:input wire:model="phone" label="Phone" />
+                <flux:input wire:model="website" label="Website" />
+            </div>
+            <div class="space-y-6">
+                <flux:input wire:model="tax_id" label="Tax ID / Registration Number" />
+                <flux:select wire:model="status" label="Status" required>
+                    <flux:select.option value="active">Active</flux:select.option>
+                    <flux:select.option value="inactive">Inactive</flux:select.option>
+                </flux:select>
+            </div>
             <div class="col-span-full">
                 <flux:textarea wire:model="address" label="Address" rows="3" />
             </div>
 
-            <div class="flex col-span-full gap-2">
+            <div class="flex col-span-full gap-2 pt-4">
                 <flux:spacer />
                 <flux:button variant="ghost" wire:click="showEditModal = false">Cancel</flux:button>
                 <flux:button type="submit" variant="primary">Update Company</flux:button>

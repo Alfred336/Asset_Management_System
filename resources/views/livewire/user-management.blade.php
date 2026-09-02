@@ -1,11 +1,11 @@
 <div class="space-y-8 p-4 lg:p-0">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <div>
+        <div class="space-y-1">
             <flux:heading size="xl" level="1" class="font-black tracking-tight">System Users</flux:heading>
             <flux:subheading>Manage access, roles, and user profiles.</flux:subheading>
         </div>
         @can('create-user')
-            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-lg shadow-pink-500/25 bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700">Provision User</flux:button>
+            <flux:button icon="plus" variant="primary" wire:click="creating" class="shadow-sm">Provision User</flux:button>
         @endcan
     </div>
 
@@ -19,7 +19,7 @@
 
     <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search system users..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl focus:ring-pink-500" />
+            <flux:input icon="magnifying-glass" wire:model.live.debounce.500ms="search" placeholder="Search system users..." class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl" />
         </div>
         <flux:checkbox wire:model.live="showTrashed" label="Archive" />
     </div>
@@ -37,12 +37,12 @@
 
             <flux:table.rows>
                 @foreach ($users as $user)
-                    <flux:table.row :key="$user->id" class="group hover:bg-pink-50/30 dark:hover:bg-pink-900/10 transition-colors">
-                        <flux:table.cell class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">{{ $user->name }}</flux:table.cell>
+                    <flux:table.row :key="$user->id" class="group hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
+                        <flux:table.cell class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ $user->name }}</flux:table.cell>
                         <flux:table.cell class="text-sm font-medium text-zinc-600 dark:text-zinc-400">{{ $user->email }}</flux:table.cell>
                         <flux:table.cell>
                             @if($user->roles->isNotEmpty())
-                                <flux:badge color="pink" variant="outline" size="sm" class="font-bold uppercase text-[10px]">{{ $user->roles->first()->name }}</flux:badge>
+                                <flux:badge color="brand" variant="outline" size="sm" class="font-bold uppercase text-[10px]">{{ $user->roles->first()->name }}</flux:badge>
                             @else
                                 <span class="text-[10px] uppercase tracking-wider text-zinc-400">—</span>
                             @endif
@@ -100,37 +100,46 @@
 
     <!-- Create Modal -->
     <flux:modal wire:model="showCreateModal" class="space-y-6">
-        <div>
-            <flux:heading size="lg">Provision User</flux:heading>
-            <flux:subheading>Create a new system user account.</flux:subheading>
-        </div>
-        <form wire:submit.prevent="create" class="space-y-4">
-            <flux:input wire:model="name" label="Name" required />
-            <flux:input type="email" wire:model="email" label="Email" required />
-            <div class="grid grid-cols-2 gap-4">
-                <flux:input type="password" wire:model="password" label="Password" required />
-                <flux:input type="password" wire:model="password_confirmation" label="Confirm Password" required />
-            </div>
-            <flux:select wire:model="selectedRole" label="Role">
-                <flux:select.option value="">— No Role —</flux:select.option>
-                @foreach($roles as $role)
-                    <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
+        <div class="flex items-center justify-between">
             <div>
-                <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Assigned Companies / Workplaces</label>
+                <flux:heading size="lg">Provision User</flux:heading>
+                <flux:subheading>Create a new system user account.</flux:subheading>
+            </div>
+        </div>
+        <form wire:submit.prevent="create" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <flux:input wire:model="name" label="Name" required />
+                <flux:input type="email" wire:model="email" label="Email" required />
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:input type="password" wire:model="password" label="Password" required />
+                    <flux:input type="password" wire:model="password_confirmation" label="Confirm Password" required />
+                </div>
+                <flux:select wire:model="selectedRole" label="Role">
+                    <flux:select.option value="">— No Role —</flux:select.option>
+                    @foreach($roles as $role)
+                        <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Assigned Companies / Workplaces</label>
+                    <span class="text-[10px] text-zinc-400 uppercase">Multi-select</span>
+                </div>
                 <div class="max-h-40 overflow-y-auto space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
                     @forelse($companies as $company)
-                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer">
-                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-pink-600 focus:ring-pink-500 dark:border-zinc-700 dark:bg-zinc-800" />
-                            <span>{{ $company->name }}</span>
+                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded transition-colors">
+                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500 dark:border-zinc-700 dark:bg-zinc-800" />
+                            <span class="truncate">{{ $company->name }}</span>
                         </label>
                     @empty
                         <p class="text-xs text-zinc-500">No active companies available.</p>
                     @endforelse
                 </div>
-                <p class="text-xs text-zinc-500 mt-1">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
+                <p class="text-xs text-zinc-500">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
             </div>
+
             <div class="flex gap-2 pt-2">
                 <flux:spacer />
                 <flux:button variant="ghost" wire:click="showCreateModal = false">Cancel</flux:button>
@@ -141,40 +150,44 @@
 
     <!-- Edit Modal -->
     <flux:modal wire:model="showEditModal" class="space-y-6">
-        <div>
-            <flux:heading size="lg">Edit User</flux:heading>
-            <flux:subheading>Update system user account details.</flux:subheading>
-        </div>
-        <form wire:submit.prevent="update" class="space-y-4">
-            <flux:input wire:model="name" label="Name" required />
-            <flux:input type="email" wire:model="email" label="Email" required />
-
-            <flux:select wire:model="selectedRole" label="Role">
-                <flux:select.option value="">— No Role —</flux:select.option>
-                @foreach($roles as $role)
-                    <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
-
+        <div class="flex items-center justify-between">
             <div>
-                <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Assigned Companies / Workplaces</label>
+                <flux:heading size="lg">Edit User</flux:heading>
+                <flux:subheading>Update system user account details.</flux:subheading>
+            </div>
+        </div>
+        <form wire:submit.prevent="update" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <flux:input wire:model="name" label="Name" required />
+                <flux:input type="email" wire:model="email" label="Email" required />
+                <flux:select wire:model="selectedRole" label="Role">
+                    <flux:select.option value="">— No Role —</flux:select.option>
+                    @foreach($roles as $role)
+                        <flux:select.option value="{{ $role->name }}">{{ $role->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:select wire:model="status" label="Status">
+                    <flux:select.option value="active">Active</flux:select.option>
+                    <flux:select.option value="inactive">Inactive</flux:select.option>
+                </flux:select>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Assigned Companies / Workplaces</label>
+                    <span class="text-[10px] text-zinc-400 uppercase">Multi-select</span>
+                </div>
                 <div class="max-h-40 overflow-y-auto space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
                     @forelse($companies as $company)
-                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer">
-                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-pink-600 focus:ring-pink-500 dark:border-zinc-700 dark:bg-zinc-800" />
-                            <span>{{ $company->name }}</span>
+                        <label class="flex items-center gap-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-1 rounded transition-colors">
+                            <input type="checkbox" value="{{ $company->id }}" wire:model="selectedCompanies" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500 dark:border-zinc-700 dark:bg-zinc-800" />
+                            <span class="truncate">{{ $company->name }}</span>
                         </label>
                     @empty
                         <p class="text-xs text-zinc-500">No active companies available.</p>
                     @endforelse
                 </div>
-                <p class="text-xs text-zinc-500 mt-1">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
+                <p class="text-xs text-zinc-500">Users can only access data belonging to selected companies. Super Admin / System Admin users retain access to all companies.</p>
             </div>
-
-            <flux:select wire:model="status" label="Status">
-                <flux:select.option value="active">Active</flux:select.option>
-                <flux:select.option value="inactive">Inactive</flux:select.option>
-            </flux:select>
 
             <div class="flex gap-2 pt-2">
                 <flux:spacer />

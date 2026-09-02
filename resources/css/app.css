@@ -11,7 +11,7 @@
 @theme {
     --font-sans: 'Inter', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
-    /* Professional SaaS Neutral Scale (Deep Blue-ish Grays) */
+    /* Professional SaaS Neutral Scale - Refined for maximum clarity and contrast */
     --color-zinc-50:  #f9fafb;
     --color-zinc-100: #f3f4f6;
     --color-zinc-200: #e5e7eb;
@@ -24,7 +24,7 @@
     --color-zinc-900: #111827;
     --color-zinc-950: #030712;
 
-    /* Enterprise Brand Palette */
+    /* Enterprise Brand Palette - Deep, Trustworthy Indigo */
     --color-brand-50:  #eef2ff;
     --color-brand-100: #e0e7ff;
     --color-brand-200: #c7d2fe;
@@ -54,21 +54,27 @@
         @apply bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border-white/20 dark:border-zinc-800/50;
     }
     .premium-card {
-        @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.04)] dark:shadow-none transition-all duration-300 hover:shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)];
+        @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all duration-200 hover:shadow-md;
     }
     .stat-label {
         @apply text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400;
     }
+    .btn-enterprise {
+        @apply px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 active:scale-95;
+    }
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        border-color: var(--color-zinc-200, currentColor);
+    }
+
+    body {
+        @apply text-zinc-900 dark:text-zinc-100 antialiased;
     }
 }
 
@@ -77,7 +83,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -85,7 +91,3 @@ textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
-
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
