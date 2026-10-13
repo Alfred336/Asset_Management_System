@@ -132,7 +132,7 @@
                 <flux:heading size="lg">{{ $viewingDevice['asset_tag'] ?? 'Device Details' }}</flux:heading>
                 <flux:subheading>{{ $viewingDevice['model'] ?? 'View device information.' }}</flux:subheading>
             </div>
-            <flux:badge :color="$viewingDevice['status'] === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+            <flux:badge :color="($viewingDevice['status'] ?? null) === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
                 {{ str_replace('_', ' ', $viewingDevice['status'] ?? 'Unknown') }}
             </flux:badge>
         </div>

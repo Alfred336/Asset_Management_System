@@ -115,7 +115,7 @@
                 <flux:heading size="lg">{{ $viewingStaff['full_name'] ?? 'Staff Details' }}</flux:heading>
                 <flux:subheading>{{ $viewingStaff['position'] ?? 'View staff information.' }}</flux:subheading>
             </div>
-            <flux:badge :color="$viewingStaff['status'] === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+            <flux:badge :color="($viewingStaff['status'] ?? null) === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
                 {{ str_replace('_', ' ', $viewingStaff['status'] ?? 'Unknown') }}
             </flux:badge>
         </div>

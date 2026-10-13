@@ -98,7 +98,7 @@
                 <flux:heading size="lg">{{ $viewingCompany['name'] ?? 'Company Details' }}</flux:heading>
                 <flux:subheading>{{ $viewingCompany['email'] ?? 'View company information.' }}</flux:subheading>
             </div>
-            <flux:badge :color="$viewingCompany['status'] === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
+            <flux:badge :color="($viewingCompany['status'] ?? null) === 'active' ? 'success' : 'zinc'" variant="outline" size="sm" class="font-bold uppercase text-[10px]">
                 {{ $viewingCompany['status'] ?? 'Unknown' }}
             </flux:badge>
         </div>
